@@ -1,19 +1,10 @@
-use std::format;
-use std::fs;
-
 use color_eyre::Report;
 use colored::*;
 use structopt::StructOpt;
 
 use advent2021_lib::get_days;
+use advent2021_lib::get_string;
 use advent2021_lib::Day;
-
-fn get_string(day: usize) -> String {
-    match fs::read_to_string(format!("inputs/day{:02}.txt", day)) {
-        Err(e) => panic!("Err: {}, inputs/day{:02}.txt", e, day),
-        Ok(string) => string,
-    }
-}
 
 #[derive(StructOpt)]
 struct Cli {
@@ -26,16 +17,14 @@ struct Cli {
     parallel: bool,
 }
 
-fn print_day(day_num: usize, day: Day)
-{
+fn print_day(day_num: usize, day: Day) {
     println!("Day {}", day_num);
     println!("Part 1: {}", day.display.0);
     println!("Part 2: {}", day.display.1);
     println!();
 }
 
-fn print_day_visual(day_num: usize, day: Day)
-{
+fn print_day_visual(day_num: usize, day: Day) {
     println!("Day {}", day_num);
     println!();
     if let Some(s) = day.visual {
@@ -48,7 +37,6 @@ fn print_day_visual(day_num: usize, day: Day)
 }
 
 fn main() -> Result<(), Report> {
-
     setup()?;
 
     println!("{}", "Advent Of Code 2020".bold().blue());
@@ -63,14 +51,10 @@ fn main() -> Result<(), Report> {
     }
 
     if args.parallel {
-        let threads = get_days()
-            .into_iter()
-            .map(|(day_num, day_func)| {
-                println!("Spawn day {}", day_num);
-                std::thread::spawn(move || {
-                    day_func(get_string(day_num))
-                })
-            });
+        let threads = get_days().into_iter().map(|(day_num, day_func)| {
+            println!("Spawn day {}", day_num);
+            std::thread::spawn(move || day_func(get_string(day_num)))
+        });
         std::thread::yield_now();
         std::thread::sleep(std::time::Duration::from_millis(50));
         println!();
@@ -81,16 +65,15 @@ fn main() -> Result<(), Report> {
 
     if !(args.all || args.parallel) {
         let day_funcs = get_days();
-        
         match args.puzzle {
             None => {
                 let (&day_num, day_func) = day_funcs.iter().next_back().unwrap();
                 print_day(day_num, day_func(get_string(day_num)));
-            },
+            }
             Some(day_num) => {
                 let day_func = day_funcs.get(&day_num).expect("invalid day");
                 print_day_visual(day_num, day_func(get_string(day_num)));
-            },
+            }
         };
     }
 

@@ -52,10 +52,11 @@ pub fn main(input: String) -> Day {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::get_string;
 
     #[test]
     fn test_main() {
-        let day = main();
+        let day = main(get_string(0));
         assert_eq!(day.answers.0, "158916");
         assert_eq!(day.answers.1, "165795564");
     }

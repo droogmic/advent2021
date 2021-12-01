@@ -63,15 +63,14 @@ fn main() -> Result<(), Report> {
     }
 
     if args.parallel {
-        let threads: Vec<_> = get_days()
+        let threads = get_days()
             .into_iter()
             .map(|(day_num, day_func)| {
                 println!("Spawn day {}", day_num);
                 std::thread::spawn(move || {
                     day_func(get_string(day_num))
                 })
-            })
-            .collect();
+            });
         std::thread::yield_now();
         std::thread::sleep(std::time::Duration::from_millis(50));
         println!();

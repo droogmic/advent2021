@@ -2,7 +2,6 @@ use std::collections::btree_map::BTreeMap;
 use std::format;
 use std::fs;
 
-pub mod day00;
 pub mod day01;
 
 #[derive(Debug, Default)]
@@ -17,7 +16,6 @@ pub struct Day {
 
 pub fn get_days() -> BTreeMap<usize, fn(String) -> Day> {
     let mut days = BTreeMap::<usize, fn(_) -> _>::new();
-    days.insert(0, day00::main);
     days.insert(1, day01::main);
     days
 }

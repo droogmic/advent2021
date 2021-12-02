@@ -1,7 +1,5 @@
 use crate::{Day, Parts};
 
-use itertools::{izip, zip};
-
 pub fn get_data(input: String) -> Vec<usize> {
     input
         .lines()
@@ -15,45 +13,24 @@ enum MeasurementChange {
     DEC,
 }
 
-pub fn depths_increasing(sonar_depths: &[usize]) -> usize {
-    zip(sonar_depths, &sonar_depths[1..])
-        .map(|(first, second)| {
-            if second > first {
-                MeasurementChange::INC
-            } else if first > second {
-                MeasurementChange::DEC
-            } else {
-                MeasurementChange::FLT
-            }
+pub fn depths_increasing(sonar_depths: &[usize], size: usize) -> usize {
+    sonar_depths
+        .windows(size)
+        .map(|window| match window {
+            w if w.first() < w.last() => MeasurementChange::INC,
+            w if w.first() > w.last() => MeasurementChange::DEC,
+            w if w.first() == w.last() => MeasurementChange::FLT,
+            _ => unreachable!(),
         })
         .filter(|change| matches!(change, MeasurementChange::INC))
         .count()
 }
 
-pub fn depths_increasing_threes(sonar_depths: &[usize]) -> usize {
-    zip(
-        izip!(sonar_depths, &sonar_depths[1..], &sonar_depths[2..]),
-        izip!(&sonar_depths[1..], &sonar_depths[2..], &sonar_depths[3..]),
-    )
-    .map(|((a, b, c), (x, y, z))| {
-        let first = a + b + c;
-        let second = x + y + z;
-        if second > first {
-            MeasurementChange::INC
-        } else if first > second {
-            MeasurementChange::DEC
-        } else {
-            MeasurementChange::FLT
-        }
-    })
-    .filter(|change| matches!(change, MeasurementChange::INC))
-    .count()
-}
-
 pub fn main(input: String) -> Day {
     let sonar_depths = get_data(input);
-    let increasing = depths_increasing(&sonar_depths);
-    let threes_increasing = depths_increasing_threes(&sonar_depths);
+    let increasing = depths_increasing(&sonar_depths, 2);
+    // Average of 3 is like a window of 4
+    let threes_increasing = depths_increasing(&sonar_depths, 4);
 
     Day {
         answers: Parts(increasing.to_string(), threes_increasing.to_string()),
@@ -78,17 +55,19 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let result = depths_increasing(&get_data(
-            "199\n200\n208\n210\n200\n207\n240\n269\n260\n263".into(),
-        ));
+        let result = depths_increasing(
+            &get_data("199\n200\n208\n210\n200\n207\n240\n269\n260\n263".into()),
+            2,
+        );
         assert_eq!(result, 7);
     }
 
     #[test]
     fn test_example_part2() {
-        let result = depths_increasing_threes(&get_data(
-            "199\n200\n208\n210\n200\n207\n240\n269\n260\n263".into(),
-        ));
+        let result = depths_increasing(
+            &get_data("199\n200\n208\n210\n200\n207\n240\n269\n260\n263".into()),
+            4,
+        );
         assert_eq!(result, 5);
     }
 

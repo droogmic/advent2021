@@ -1,15 +1,14 @@
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
 
-use advent2021_bin::get_string;
-
-use advent2021_lib::day00;
+use advent2021_lib::day01;
+use advent2021_lib::get_string;
 
 pub fn benchmark(c: &mut Criterion) {
-    let expenses = day1::get_data(get_string(0));
+    let depths = day01::get_data(get_string(1));
     let mut group = c.benchmark_group("day1::main");
-    for n in [2, 3].iter() {
+    for n in [2, 3, 4].iter() {
         group.bench_with_input(BenchmarkId::from_parameter(n), n, |b, &n| {
-            b.iter(|| day1::calc(expenses.to_vec(), n))
+            b.iter(|| day01::depths_increasing(&depths, n))
         });
     }
     group.finish();

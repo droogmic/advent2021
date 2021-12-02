@@ -33,10 +33,26 @@ pub struct Command {
     distance: usize,
 }
 
+impl FromStr for Command {
+    type Err = CommandError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut tokens = s.split(' ');
+        Ok(Command {
+            direction: tokens.next().ok_or(CommandError)?.parse()?,
+            distance: tokens
+                .next()
+                .ok_or(CommandError)?
+                .parse()
+                .map_err(|_| CommandError {})?,
+        })
+    }
+}
+
 #[derive(Default)]
 pub struct Location {
     position: usize,
-    depth: usize
+    depth: usize,
 }
 
 impl Add<&Command> for Location {
@@ -61,19 +77,35 @@ impl Add<&Command> for Location {
     }
 }
 
-impl FromStr for Command {
-    type Err = CommandError;
+#[derive(Default)]
+pub struct LocationAim {
+    position: usize,
+    depth: usize,
+    aim: usize,
+}
 
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let mut tokens = s.split(' ');
-        Ok(Command {
-            direction: tokens.next().ok_or(CommandError)?.parse()?,
-            distance: tokens
-                .next()
-                .ok_or(CommandError)?
-                .parse()
-                .map_err(|_| CommandError {})?,
-        })
+impl Add<&Command> for LocationAim {
+    type Output = Self;
+
+    fn add(self, command: &Command) -> Self {
+        match command {
+            Command{ direction: Direction::Forward, distance } => Self {
+                position: self.position + distance,
+                depth: self.depth + self.aim * distance,
+                aim: self.aim,
+            },
+            Command{ direction: Direction::Down, distance } => Self {
+                position: self.position,
+                depth: self.depth,
+                aim: self.aim + distance,
+            },
+            Command{ direction: Direction::Up, distance } => Self {
+                position: self.position,
+                depth: self.depth,
+                aim: self.aim - distance,
+            },
+        }
+        
     }
 }
 
@@ -88,21 +120,29 @@ pub fn navigate(commands: &[Command]) -> Location {
     commands.iter().fold(Location::default(), |location, command| location + command)
 }
 
+pub fn navigate_aim(commands: &[Command]) -> LocationAim {
+    commands.iter().fold(LocationAim::default(), |location, command| location + command)
+}
+
+
 pub fn main(input: String) -> Day {
     let commands = get_data(input);
     let location = navigate(&commands);
-    let product = location.position * location.depth;
+    let part1 = location.position * location.depth;
+
+    let location = navigate_aim(&commands);
+    let part2 = location.position * location.depth;
 
     Day {
-        answers: Parts(product.to_string(), product.to_string()),
+        answers: Parts(part1.to_string(), part2.to_string()),
         display: Parts(
             format!(
                 "The horizontal position to final depth product is {}",
-                product
+                part1
             ),
             format!(
-                "There are {} sums larger than the previous sum",
-                product
+                "The horizontal position to final depth product is {}",
+                part2
             ),
         ),
         ..Default::default()

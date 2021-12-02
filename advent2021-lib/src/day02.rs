@@ -7,9 +7,9 @@ use crate::{Day, Parts};
 struct DirectionError;
 
 enum Direction {
-    FORWARD,
-    DOWN,
-    UP,
+    Forward,
+    Down,
+    Up,
 }
 
 impl FromStr for Direction {
@@ -17,10 +17,10 @@ impl FromStr for Direction {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Ok(match s {
-            "forward" => Self::FORWARD,
-            "down" => Self::DOWN,
-            "up" => Self::UP,
-            _ => Err(CommandError{})?,
+            "forward" => Self::Forward,
+            "down" => Self::Down,
+            "up" => Self::Up,
+            _ => return Err(CommandError{}),
         })
     }
 }
@@ -44,15 +44,15 @@ impl Add<&Command> for Location {
 
     fn add(self, command: &Command) -> Self {
         match command {
-            Command{ direction: Direction::FORWARD, distance } => Self {
+            Command{ direction: Direction::Forward, distance } => Self {
                 position: self.position + distance,
                 depth: self.depth,
             },
-            Command{ direction: Direction::DOWN, distance } => Self {
+            Command{ direction: Direction::Down, distance } => Self {
                 position: self.position,
                 depth: self.depth + distance,
             },
-            Command{ direction: Direction::UP, distance } => Self {
+            Command{ direction: Direction::Up, distance } => Self {
                 position: self.position,
                 depth: self.depth - distance,
             },
@@ -85,7 +85,7 @@ pub fn get_data(input: String) -> Vec<Command> {
 }
 
 pub fn navigate(commands: &[Command]) -> Location {
-    commands.iter().fold(Location::default(), |location, command| location + &command)
+    commands.iter().fold(Location::default(), |location, command| location + command)
 }
 
 pub fn main(input: String) -> Day {

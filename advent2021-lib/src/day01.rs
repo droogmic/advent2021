@@ -8,21 +8,21 @@ pub fn get_data(input: String) -> Vec<usize> {
 }
 
 enum MeasurementChange {
-    FLT,
-    INC,
-    DEC,
+    Flt,
+    Inc,
+    Dec,
 }
 
 pub fn depths_increasing(sonar_depths: &[usize], size: usize) -> usize {
     sonar_depths
         .windows(size)
         .map(|window| match window {
-            w if w.first() < w.last() => MeasurementChange::INC,
-            w if w.first() > w.last() => MeasurementChange::DEC,
-            w if w.first() == w.last() => MeasurementChange::FLT,
+            w if w.first() < w.last() => MeasurementChange::Inc,
+            w if w.first() > w.last() => MeasurementChange::Dec,
+            w if w.first() == w.last() => MeasurementChange::Flt,
             _ => unreachable!(),
         })
-        .filter(|change| matches!(change, MeasurementChange::INC))
+        .filter(|change| matches!(change, MeasurementChange::Inc))
         .count()
 }
 

@@ -86,5 +86,8 @@ fn setup() -> Result<(), Report> {
     }
     color_eyre::install()?;
 
+    pretty_env_logger::init();
+    log::info!("Starting Logging");
+
     Ok(())
 }

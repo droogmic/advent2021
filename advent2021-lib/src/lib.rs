@@ -4,6 +4,7 @@ use std::fs;
 
 pub mod day01;
 pub mod day02;
+pub mod day03;
 
 #[derive(Debug, Default)]
 pub struct Parts(pub String, pub String);
@@ -24,21 +25,34 @@ pub struct Day {
 
 pub fn get_days() -> BTreeMap<usize, Day> {
     let mut days = BTreeMap::new();
-    days.insert(1, Day {
-        title: "".to_owned(),
-        calc: day01::main,
-    });
-    days.insert(2, Day {
-        title: "Dive!".to_owned(),
-        calc: day02::main,
-    });
+    days.insert(
+        1,
+        Day {
+            title: "".to_owned(),
+            calc: day01::main,
+        },
+    );
+    days.insert(
+        2,
+        Day {
+            title: "Dive!".to_owned(),
+            calc: day02::main,
+        },
+    );
+    days.insert(
+        3,
+        Day {
+            title: "Binary Diagnostic".to_owned(),
+            calc: day03::main,
+        },
+    );
     days
 }
 
 pub fn get_input(day: usize) -> String {
-    match fs::read_to_string(format!("inputs/day{:02}.txt", day)).or_else(|_| {
-        fs::read_to_string(format!("../inputs/day{:02}.txt", day))
-    }) {
+    match fs::read_to_string(format!("inputs/day{:02}.txt", day))
+        .or_else(|_| fs::read_to_string(format!("../inputs/day{:02}.txt", day)))
+    {
         Err(e) => panic!("Err: {}, inputs/day{:02}.txt", e, day),
         Ok(string) => string,
     }

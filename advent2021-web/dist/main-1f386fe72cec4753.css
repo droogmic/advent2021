@@ -1,0 +1,37 @@
+body {
+    background: #0e0e16;
+    color: #cccccc;
+    font-family: "Source Code Pro", monospace;
+}
+
+h1 {
+	color: rgb(0, 204, 0);
+	font-weight: 400;
+	outline-color: rgb(0, 204, 0);
+	text-decoration: rgb(0, 204, 0);
+	text-decoration-color: rgb(0, 204, 0);
+	text-shadow: rgb(0, 204, 0) 0px 0px 2px, rgb(0, 204, 0) 0px 0px 5px;
+	white-space: nowrap;
+	-moz-text-size-adjust: none
+}
+
+button {
+	margin-left: 1em;
+}
+
+pre {
+    background: #000;
+    border: 1px solid rgb(56, 56, 56);
+    border-left: 3px solid #200e07;
+    color: rgb(184, 184, 184);
+    page-break-inside: avoid;
+    font-family: monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 1.6em;
+    max-width: 100%;
+    overflow: auto;
+    padding: 1em 1.5em;
+    display: block;
+    word-wrap: break-word;
+}

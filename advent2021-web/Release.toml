@@ -1,0 +1,4 @@
+[build]
+public_url = "/advent2021/"
+release = true
+dist = "dist"

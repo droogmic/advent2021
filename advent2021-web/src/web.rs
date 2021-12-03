@@ -55,17 +55,11 @@ impl Component for Day {
                 let result = day_func(&self.props.example);
                 let part1 = format!(
                     "Part 1: {}",
-                    self.props
-                        .text_format
-                        .0
-                        .replace("{answer}", &result.0.to_string())
+                    self.props.text_format.0.replace("{answer}", &result.0)
                 );
                 let part2 = format!(
                     "Part 2: {}",
-                    self.props
-                        .text_format
-                        .1
-                        .replace("{answer}", &result.1.to_string())
+                    self.props.text_format.1.replace("{answer}", &result.1)
                 );
                 log::info!("{}", part1);
                 log::info!("{}", part2);
@@ -73,9 +67,9 @@ impl Component for Day {
                 true
             }
             Msg::File(Some(file)) => {
-                let file_name = file.name().clone();
+                let file_name = file.name();
                 let task = {
-                    let callback = self.link.callback(move |data| Msg::Loaded(data));
+                    let callback = self.link.callback(Msg::Loaded);
                     ReaderService::read_file(file, callback).unwrap()
                 };
                 self.tasks.insert(file_name, task);

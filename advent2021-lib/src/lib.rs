@@ -57,9 +57,9 @@ impl<D: 'static, O: 'static + std::fmt::Display> Calculable for Day<D, O> {
         )
     }
     fn get_both_func(&self) -> Rc<dyn Fn(&str) -> (String, String)> {
-        let parse = self.calc.parse.clone();
-        let part1 = self.calc.part1.clone();
-        let part2 = self.calc.part2.clone();
+        let parse = self.calc.parse;
+        let part1 = self.calc.part1;
+        let part2 = self.calc.part2;
         Rc::new(move |input: &str| {
             let input = parse(&input.to_string());
             (

@@ -43,7 +43,7 @@ impl Component for Model {
                 {
                     for days.iter().map(|(day_num, day)| {
                         let props = yew::props!(web::Day::Properties {
-                            day_num: day_num.clone(),
+                            day_num: *day_num,
                             title: day.get_title(),
                             example: day.get_example().to_owned(),
                             both_func: day.get_both_func(),

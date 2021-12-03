@@ -1,0 +1,2 @@
+[build]
+target = "advent2021-web/index.html"

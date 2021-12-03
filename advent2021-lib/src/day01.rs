@@ -1,4 +1,4 @@
-use crate::{Day, Parts};
+use crate::{DayOutput, Parts};
 
 pub fn get_data(input: String) -> Vec<usize> {
     input
@@ -26,13 +26,13 @@ pub fn depths_increasing(sonar_depths: &[usize], size: usize) -> usize {
         .count()
 }
 
-pub fn main(input: String) -> Day {
+pub fn main(input: String) -> DayOutput {
     let sonar_depths = get_data(input);
     let increasing = depths_increasing(&sonar_depths, 2);
     // Average of 3 is like a window of 4
     let threes_increasing = depths_increasing(&sonar_depths, 4);
 
-    Day {
+    DayOutput {
         answers: Parts(increasing.to_string(), threes_increasing.to_string()),
         display: Parts(
             format!(
@@ -51,7 +51,7 @@ pub fn main(input: String) -> Day {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::get_string;
+    use crate::get_input;
 
     #[test]
     fn test_example_part1() {
@@ -73,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_main() {
-        let day = main(get_string(1));
+        let day = main(get_input(1));
         assert_eq!(day.answers.0, "1393");
         assert_eq!(day.answers.1, "1359");
     }

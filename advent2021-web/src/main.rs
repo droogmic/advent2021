@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use yew::prelude::*;
 
-mod days;
+use advent2021_lib::get_days;
 
 mod web;
 
@@ -49,12 +49,13 @@ impl Component for Model {
     }
 
     fn view(&self) -> Html {
+        let day_funcs = get_days();
         html! {
             <div>
                 <h1>{"Advent of Code"}</h1>
                 {
-                    for days::Days::get_days().iter().enumerate().map(|(idx, day)| html!{
-                        <web::Day index=idx title=day.title.clone()/>
+                    for day_funcs.iter().map(|(day_num, day_func)| html!{
+                        <web::Day day_num=day_num title=day.title.clone()/>
                     })
                 }
             </div>

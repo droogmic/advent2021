@@ -1,7 +1,7 @@
 use std::str::FromStr;
 use std::ops::Add;
 
-use crate::{Day, Parts};
+use crate::{DayOutput, Parts};
 
 #[derive(Debug, Clone)]
 struct DirectionError;
@@ -112,7 +112,7 @@ impl Add<&Command> for LocationAim {
 pub fn get_data(input: String) -> Vec<Command> {
     input
         .lines()
-        .map(|line| line.parse().expect("bad input"))
+        .map(|line| line.parse().expect("Bad Input"))
         .collect()
 }
 
@@ -125,7 +125,7 @@ pub fn navigate_aim(commands: &[Command]) -> LocationAim {
 }
 
 
-pub fn main(input: String) -> Day {
+pub fn main(input: String) -> DayOutput {
     let commands = get_data(input);
     let location = navigate(&commands);
     let part1 = location.position * location.depth;
@@ -133,7 +133,7 @@ pub fn main(input: String) -> Day {
     let location = navigate_aim(&commands);
     let part2 = location.position * location.depth;
 
-    Day {
+    DayOutput {
         answers: Parts(part1.to_string(), part2.to_string()),
         display: Parts(
             format!(
@@ -152,28 +152,28 @@ pub fn main(input: String) -> Day {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::get_string;
+    use crate::get_input;
 
     #[test]
     fn test_example_part1() {
         let result = navigate(
             &get_data("forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2".into()),
         );
-        assert_eq!(result, 7);
+        assert_eq!(result.position * result.depth, 150);
     }
 
     #[test]
     fn test_example_part2() {
-        let result = navigate(
+        let result = navigate_aim(
             &get_data("forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2".into()),
         );
-        assert_eq!(result, 5);
+        assert_eq!(result.position * result.depth, 900);
     }
 
     #[test]
     fn test_main() {
-        let day = main(get_string(1));
-        assert_eq!(day.answers.0, "0");
-        assert_eq!(day.answers.1, "0");
+        let day = main(get_input(2));
+        assert_eq!(day.answers.0, "2027977");
+        assert_eq!(day.answers.1, "1903644897");
     }
 }

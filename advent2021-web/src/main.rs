@@ -45,7 +45,7 @@ impl Component for Model {
                         let props = yew::props!(web::Day::Properties {
                             day_num: day_num.clone(),
                             title: day.get_title(),
-                            example: day.get_example(),
+                            example: day.get_example().to_owned(),
                             both_func: day.get_both_func(),
                             text_format: day.get_display(),
                         });

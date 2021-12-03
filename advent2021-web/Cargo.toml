@@ -5,6 +5,9 @@ name = "advent2021"
 version = "0.1.0"
 edition = "2021"
 
+[patch.crates-io]
+recap = { git = "https://github.com/droogmic/recap", branch = "release-0.1.2" }
+
 [dependencies]
 advent2021-lib = { path = "../advent2021-lib" }
 console_log = { version = "0.2", optional = true, features = ["color"] }

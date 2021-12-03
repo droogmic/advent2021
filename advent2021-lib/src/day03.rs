@@ -201,7 +201,7 @@ pub fn part2(report: &Report) -> PartOutput<usize> {
 }
 
 pub const DAY: Day<Report, usize> = Day {
-    title: "Dive!",
+    title: "Binary Diagnostic",
     display: (
         "The power consumption of the submarine is {answer}",
         "The life support rating is {answer}",

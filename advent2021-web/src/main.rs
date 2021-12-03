@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use yew::prelude::*;
 
 use advent2021_lib::get_days;
@@ -10,15 +8,12 @@ mod web;
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-pub enum Msg {
-    Run,
-}
+pub enum Msg {}
 
 pub struct Model {
     // `ComponentLink` is like a reference to a component.
     // It can be used to send messages to the component
-    link: ComponentLink<Self>,
-    days: days::Days,
+    _link: ComponentLink<Self>,
 }
 
 impl Component for Model {
@@ -26,19 +21,11 @@ impl Component for Model {
     type Properties = ();
 
     fn create(_props: Self::Properties, link: ComponentLink<Self>) -> Self {
-        Self {
-            link,
-            days: days::Days {},
-        }
+        Self { _link: link }
     }
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
-        match msg {
-            Msg::Run => {
-                log::info!("Running Something",);
-                true
-            }
-        }
+        match msg {}
     }
 
     fn change(&mut self, _props: Self::Properties) -> ShouldRender {
@@ -49,13 +36,22 @@ impl Component for Model {
     }
 
     fn view(&self) -> Html {
-        let day_funcs = get_days();
+        let days = get_days();
         html! {
             <div>
                 <h1>{"Advent of Code"}</h1>
                 {
-                    for day_funcs.iter().map(|(day_num, day_func)| html!{
-                        <web::Day day_num=day_num title=day.title.clone()/>
+                    for days.iter().map(|(day_num, day)| {
+                        let props = yew::props!(web::Day::Properties {
+                            day_num: day_num.clone(),
+                            title: day.get_title(),
+                            example: day.get_example(),
+                            both_func: day.get_both_func(),
+                            text_format: day.get_display(),
+                        });
+                        html!{
+                            <web::Day with props/>
+                        }
                     })
                 }
             </div>

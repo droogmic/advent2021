@@ -1,16 +1,21 @@
+use std::rc::Rc;
+
 use yew::prelude::*;
 use yew::Properties;
 
-use crate::days;
-
-#[derive(Properties, Clone, PartialEq)]
+#[derive(Properties, Clone)]
 pub struct DayProps {
-    pub index: usize,
-    pub title: String,
+    pub day_num: usize,
+    pub title: &'static str,
+    pub example: &'static str,
+    pub both_func: Rc<dyn Fn(&str) -> (String, String)>,
+    pub text_format: (&'static str, &'static str),
+    #[prop_or_default]
+    pub messages: Vec<String>,
 }
 
 pub enum Msg {
-    Run,
+    RunExample,
 }
 
 pub struct Day {
@@ -30,41 +35,61 @@ impl Component for Day {
 
     fn update(&mut self, msg: Self::Message) -> ShouldRender {
         match msg {
-            Msg::Run => {
-                log::info!("Running Something",);
-                log::info!("{}", days::day0::part1("1 + 2".into()));
+            Msg::RunExample => {
+                log::info!("Running Example");
+                let day_func = self.props.both_func.clone();
+                let result = day_func(self.props.example);
+                let part1 = format!(
+                    "Part 1: {}",
+                    self.props
+                        .text_format
+                        .0
+                        .replace("{answer}", &result.0.to_string())
+                );
+                let part2 = format!(
+                    "Part 2: {}",
+                    self.props
+                        .text_format
+                        .1
+                        .replace("{answer}", &result.1.to_string())
+                );
+                log::info!("{}", part1);
+                log::info!("{}", part2);
+                self.props.messages = vec![part1, part2];
                 true
             }
         }
     }
 
-    fn change(&mut self, _props: Self::Properties) -> ShouldRender {
+    fn change(&mut self, props: Self::Properties) -> ShouldRender {
         // Should only return "true" if new properties are different to
         // previously received properties.
         // This component has no properties so we will always return "false".
-        false
+        if self.props.messages != props.messages {
+            self.props.messages = props.messages;
+            true
+        } else {
+            false
+        }
     }
 
     fn view(&self) -> Html {
         html! {
             <div>
-                <h2>{"Day "}{self.props.index}{": "}<em>{&self.props.title}</em></h2>
-                {
-                    for Self::get_examples().iter().enumerate().map(|(idx, example)| html!{
-                        <h3>
-                            {"Example "}{idx}{": "}
-                            <pre>{example}</pre>
-                            <button onclick=self.link.callback(|_| Msg::Run)>{ "run" }</button>
-                        </h3>
-                    })
-                }
+                <h2>{"Day "}{self.props.day_num}{": "}<em>{&self.props.title}</em></h2>
+                    <h3>
+                        {"Example: "}
+                        <pre>{self.props.example}</pre>
+                        <button onclick=self.link.callback(|_| Msg::RunExample)>{ "run" }</button>
+                        {
+                            for self.props.messages.iter().map(|message| {
+                                html! {
+                                    <p>{message}</p>
+                                }
+                            })
+                        }
+                    </h3>
             </div>
         }
-    }
-}
-
-impl Day {
-    fn get_examples() -> Vec<String> {
-        return vec!["1 + 2".into()];
     }
 }

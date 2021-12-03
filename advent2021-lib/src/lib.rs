@@ -1,6 +1,7 @@
 use std::collections::btree_map::BTreeMap;
 use std::format;
 use std::fs;
+use std::rc::Rc;
 
 pub mod day01;
 pub mod day02;
@@ -26,21 +27,28 @@ pub struct Day<D, O> {
 
 pub trait Printable {
     fn get_display(&self) -> (&'static str, &'static str);
+    fn get_title(&self) -> &'static str;
+    fn get_example(&self) -> &'static str;
 }
 
 impl<D, O> Printable for Day<D, O> {
     fn get_display(&self) -> (&'static str, &'static str) {
         self.display
     }
+    fn get_title(&self) -> &'static str {
+        self.title
+    }
+    fn get_example(&self) -> &'static str {
+        self.example
+    }
 }
 
 pub trait Calculable {
-    // fn part1(&self) -> String;
-    // fn part2(&self) -> String;
     fn both(&self, input: &str) -> (String, String);
+    fn get_both_func(&self) -> Rc<dyn Fn(&str) -> (String, String)>;
 }
 
-impl<D, O: std::fmt::Display> Calculable for Day<D, O> {
+impl<D: 'static, O: 'static + std::fmt::Display> Calculable for Day<D, O> {
     fn both(&self, input: &str) -> (String, String) {
         let input = (self.calc.parse)(&input.to_string());
         (
@@ -48,11 +56,23 @@ impl<D, O: std::fmt::Display> Calculable for Day<D, O> {
             (self.calc.part2)(&input).answer.to_string(),
         )
     }
+    fn get_both_func(&self) -> Rc<dyn Fn(&str) -> (String, String)> {
+        let parse = self.calc.parse.clone();
+        let part1 = self.calc.part1.clone();
+        let part2 = self.calc.part2.clone();
+        Rc::new(move |input: &str| {
+            let input = parse(&input.to_string());
+            (
+                part1(&input).answer.to_string(),
+                part2(&input).answer.to_string(),
+            )
+        })
+    }
 }
 
 pub trait DayTrait: Printable + Calculable + Send {}
 
-impl<D, O: std::fmt::Display> DayTrait for Day<D, O> {}
+impl<D: 'static, O: 'static + std::fmt::Display> DayTrait for Day<D, O> {}
 
 pub fn get_days() -> BTreeMap<usize, Box<dyn DayTrait + 'static>> {
     let mut days: BTreeMap<usize, Box<dyn DayTrait + 'static>> = BTreeMap::new();

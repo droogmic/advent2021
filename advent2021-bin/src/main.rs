@@ -4,7 +4,6 @@ use structopt::StructOpt;
 
 use advent2021_lib::get_days;
 use advent2021_lib::get_input;
-use advent2021_lib::DayOutput;
 
 #[derive(StructOpt)]
 struct Cli {
@@ -17,22 +16,20 @@ struct Cli {
     parallel: bool,
 }
 
-fn print_day(day_num: usize, day: DayOutput) {
+fn print_day<O: std::fmt::Display>(
+    day_num: usize,
+    display: (&'static str, &'static str),
+    result: (O, O),
+) {
     println!("Day {}", day_num);
-    println!("Part 1: {}", day.display.0);
-    println!("Part 2: {}", day.display.1);
-    println!();
-}
-
-fn print_day_visual(day_num: usize, day: DayOutput) {
-    println!("Day {}", day_num);
-    println!();
-    if let Some(s) = day.visual {
-        println!("{}", s);
-        println!();
-    }
-    println!("Part 1: {}", day.display.0);
-    println!("Part 2: {}", day.display.1);
+    println!(
+        "Part 1: {}",
+        display.0.replace("{answer}", &result.0.to_string())
+    );
+    println!(
+        "Part 2: {}",
+        display.1.replace("{answer}", &result.1.to_string())
+    );
     println!();
 }
 
@@ -43,38 +40,35 @@ fn main() -> Result<(), Report> {
     println!();
 
     let args = Cli::from_args();
+    let days = get_days();
 
     if args.all {
-        for (day_num, day) in get_days().into_iter() {
-            print_day(day_num, (day.calc)(get_input(day_num)));
+        for (day_num, day) in days.into_iter() {
+            let (part1, part2) = day.both(&get_input(day_num));
+            print_day(day_num, day.get_display(), (part1, part2));
         }
-    }
-
-    if args.parallel {
+    } else if args.parallel {
         let threads = get_days().into_iter().map(|(day_num, day)| {
             println!("Spawn day {}", day_num);
-            std::thread::spawn(move || (day.calc)(get_input(day_num)))
+            std::thread::spawn(move || (day_num, day.get_display(), day.both(&get_input(day_num))))
         });
         std::thread::yield_now();
         std::thread::sleep(std::time::Duration::from_millis(50));
         println!();
-        for (idx, thread) in threads.into_iter().enumerate() {
-            print_day(idx + 1, thread.join().unwrap());
+        for thread in threads.into_iter() {
+            let (day_num, display, (part1, part2)) = thread.join().unwrap();
+            print_day(day_num, display, (part1, part2));
         }
-    }
-
-    if !(args.all || args.parallel) {
-        let days = get_days();
-        match args.puzzle {
+    } else if !(args.all || args.parallel) {
+        let (day_num, day): (usize, _) = match args.puzzle {
             None => {
-                let (&day_num, day) = days.iter().next_back().unwrap();
-                print_day(day_num, (day.calc)(get_input(day_num)));
+                let (last_day_num, last_day) = days.iter().next_back().unwrap();
+                (*last_day_num, last_day)
             }
-            Some(day_num) => {
-                let day = days.get(&day_num).expect("invalid day");
-                print_day_visual(day_num, (day.calc)(get_input(day_num)));
-            }
+            Some(day_num) => (day_num, days.get(&day_num).unwrap()),
         };
+        let (part1, part2) = day.both(&get_input(day_num));
+        print_day(day_num, day.get_display(), (part1, part2));
     }
 
     Ok(())

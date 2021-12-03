@@ -7,45 +7,57 @@ pub mod day02;
 pub mod day03;
 
 #[derive(Debug, Default)]
-pub struct Parts(pub String, pub String);
-
-#[derive(Debug, Default)]
-pub struct DayOutput {
-    pub title: String,
-    pub answers: Parts,
-    pub display: Parts,
-    pub visual: Option<String>,
+pub struct PartOutput<O> {
+    pub answer: O,
 }
 
-#[derive(Debug)]
-pub struct Day {
-    pub title: String,
-    pub calc: fn(String) -> DayOutput,
+pub struct DayCalc<D, I: ?Sized, O> {
+    pub parse: fn(&str) -> D,
+    pub part1: fn(&I) -> PartOutput<O>,
+    pub part2: fn(&I) -> PartOutput<O>,
 }
 
-pub fn get_days() -> BTreeMap<usize, Day> {
-    let mut days = BTreeMap::new();
-    days.insert(
-        1,
-        Day {
-            title: "".to_owned(),
-            calc: day01::main,
-        },
-    );
-    days.insert(
-        2,
-        Day {
-            title: "Dive!".to_owned(),
-            calc: day02::main,
-        },
-    );
-    days.insert(
-        3,
-        Day {
-            title: "Binary Diagnostic".to_owned(),
-            calc: day03::main,
-        },
-    );
+pub struct Day<D, I: ?Sized, O> {
+    pub title: &'static str,
+    pub display: (&'static str, &'static str),
+    pub calc: DayCalc<D, I, O>,
+}
+
+pub trait Printable {
+    fn get_display(&self) -> (&'static str, &'static str);
+}
+
+impl<D, I: ?Sized, O> Printable for Day<D, I, O> {
+    fn get_display(&self) -> (&'static str, &'static str) {
+        self.display
+    }
+}
+
+pub trait Calculable {
+    // fn part1(&self) -> String;
+    // fn part2(&self) -> String;
+    fn both(&self, input: &str) -> (String, String);
+}
+
+impl<D: AsRef<I>, I: ?Sized, O: std::fmt::Display> Calculable for Day<D, I, O> {
+    fn both(&self, input: &str) -> (String, String) {
+        let input = (self.calc.parse)(&input.to_string());
+        (
+            (self.calc.part1)(input.as_ref()).answer.to_string(),
+            (self.calc.part2)(input.as_ref()).answer.to_string(),
+        )
+    }
+}
+
+pub trait DayTrait: Printable + Calculable + Send {}
+
+impl<D: AsRef<I>, I: ?Sized, O: std::fmt::Display> DayTrait for Day<D, I, O> {}
+
+pub fn get_days() -> BTreeMap<usize, Box<dyn DayTrait + 'static>> {
+    let mut days: BTreeMap<usize, Box<dyn DayTrait + 'static>> = BTreeMap::new();
+    days.insert(1, Box::new(day01::DAY));
+    days.insert(2, Box::new(day02::DAY));
+    days.insert(3, Box::new(day03::DAY));
     days
 }
 

@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::fmt;
 
-use crate::{DayOutput, Parts};
+use crate::{Day, DayCalc, PartOutput};
 
 struct Numbers(Vec<usize>);
 
@@ -25,14 +25,19 @@ impl fmt::Binary for Numbers {
     }
 }
 
-pub fn get_binary_rows(input: String) -> (Vec<usize>, usize) {
-    (
-        input
+struct Report {
+    numbers: Numbers,
+    width: usize,
+}
+
+pub fn get_binary_rows(input: &str) -> Report {
+    Report {
+        numbers: input
             .lines()
             .map(|line| usize::from_str_radix(line, 2).expect("invalid binary int"))
             .collect(),
-        input.lines().next().unwrap().len(),
-    )
+        width: input.lines().next().unwrap().len(),
+    }
 }
 
 /// # Get average bitwise
@@ -48,14 +53,15 @@ pub fn get_binary_rows(input: String) -> (Vec<usize>, usize) {
 /// assert_eq!(avg, 0b1111_0000);
 /// ```
 ///
-pub fn get_bitwise_avg(report_rows: &[usize], row_len: usize) -> usize {
-    let low_upper_bound_inclusive = report_rows
+pub fn get_bitwise_avg(numbers: &Numbers, row_len: usize) -> usize {
+    let numbers = numbers.0;
+    let low_upper_bound_inclusive = numbers
         .len()
         .checked_sub(1)
         .unwrap()
         .checked_div(2)
         .unwrap();
-    let high_lower_bound_inclusive = report_rows
+    let high_lower_bound_inclusive = numbers
         .len()
         .checked_add(2)
         .unwrap()
@@ -63,7 +69,7 @@ pub fn get_bitwise_avg(report_rows: &[usize], row_len: usize) -> usize {
         .unwrap();
     (0..row_len)
         .map(|mask_len| {
-            let row_sum = report_rows
+            let row_sum = numbers
                 .iter()
                 .fold(0, |acc, val| acc + ((val >> mask_len) & 1));
             match row_sum {
@@ -160,35 +166,43 @@ pub fn get_rating(report_rows: &[usize], row_len: usize, life_support: LifeSuppo
     rating
 }
 
-pub fn get_oxygen_rating(report_rows: &[usize], row_len: usize) -> usize {
+pub fn get_oxygen_rating(report_rows: &Numbers, row_len: usize) -> usize {
     get_rating(report_rows, row_len, LifeSupport::Oxygen)
 }
 
-pub fn get_co2_rating(report_rows: &[usize], row_len: usize) -> usize {
+pub fn get_co2_rating(report_rows: &Numbers, row_len: usize) -> usize {
     get_rating(report_rows, row_len, LifeSupport::Co2)
 }
 
-pub fn main(input: String) -> DayOutput {
-    let (report_rows, row_len) = get_binary_rows(input);
-    let gamma_rate = get_bitwise_avg(&report_rows, row_len);
+pub fn part1(report: &Report) -> PartOutput<usize> {
+    let gamma_rate = get_bitwise_avg(report.numbers, report.width);
     let power_consumption = gamma_rate_to_power_rate(gamma_rate, row_len);
-
-    let oxygen_rating = get_oxygen_rating(&report_rows, row_len);
-    let co2_rating = get_co2_rating(&report_rows, row_len);
-    let life_support_rating = oxygen_rating * co2_rating;
-
-    DayOutput {
-        answers: Parts(
-            power_consumption.to_string(),
-            life_support_rating.to_string(),
-        ),
-        display: Parts(
-            power_consumption.to_string(),
-            life_support_rating.to_string(),
-        ),
-        ..Default::default()
+    PartOutput {
+        answer: power_consumption,
     }
 }
+
+pub fn part2(report: &Report) -> PartOutput<usize> {
+    let oxygen_rating = get_oxygen_rating(report.numbers, report.width);
+    let co2_rating = get_co2_rating(&report_rows, row_len);
+    let life_support_rating = oxygen_rating * co2_rating;
+    PartOutput {
+        answer: life_support_rating,
+    }
+}
+
+pub const DAY: Day<Report, Report, usize> = Day {
+    title: "Dive!",
+    display: (
+        "The horizontal position to final depth product is {answer}",
+        "The horizontal position to final depth product is {answer}",
+    ),
+    calc: DayCalc {
+        parse: get_binary_rows,
+        part1: part1,
+        part2: part2,
+    },
+};
 
 #[cfg(test)]
 mod tests {
@@ -212,17 +226,17 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let (rows, length) = get_binary_rows(EXAMPLE.to_owned());
-        let result = get_bitwise_avg(&rows, length);
+        let report = get_binary_rows(EXAMPLE);
+        let result = get_bitwise_avg(&report.numbers, report.width);
         assert_eq!(result, 22);
     }
 
     #[test]
     fn test_example_part2() {
-        let (rows, length) = get_binary_rows(EXAMPLE.to_owned());
-        let oxygen_result = get_oxygen_rating(&rows, length);
+        let report = get_binary_rows(EXAMPLE);
+        let oxygen_result = get_oxygen_rating(&report.numbers, report.width);
         assert_eq!(oxygen_result, 23);
-        let co2_result = get_co2_rating(&rows, length);
+        let co2_result = get_co2_rating(&report.numbers, report.width);
         log::info!("TEST");
         assert_eq!(co2_result, 10);
     }

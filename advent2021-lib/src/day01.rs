@@ -1,6 +1,6 @@
-use crate::{DayOutput, Parts};
+use crate::{Day, DayCalc, PartOutput};
 
-pub fn get_data(input: String) -> Vec<usize> {
+pub fn get_data(input: &str) -> Vec<usize> {
     input
         .lines()
         .map(|line| line.parse().expect("bad input"))
@@ -8,45 +8,48 @@ pub fn get_data(input: String) -> Vec<usize> {
 }
 
 enum MeasurementChange {
-    Flt,
-    Inc,
-    Dec,
+    Flat,
+    Increasing,
+    Decreasing,
 }
 
 pub fn depths_increasing(sonar_depths: &[usize], size: usize) -> usize {
     sonar_depths
         .windows(size)
         .map(|window| match window {
-            w if w.first() < w.last() => MeasurementChange::Inc,
-            w if w.first() > w.last() => MeasurementChange::Dec,
-            w if w.first() == w.last() => MeasurementChange::Flt,
+            w if w.first() < w.last() => MeasurementChange::Increasing,
+            w if w.first() > w.last() => MeasurementChange::Decreasing,
+            w if w.first() == w.last() => MeasurementChange::Flat,
             _ => unreachable!(),
         })
-        .filter(|change| matches!(change, MeasurementChange::Inc))
+        .filter(|change| matches!(change, MeasurementChange::Increasing))
         .count()
 }
 
-pub fn main(input: String) -> DayOutput {
-    let sonar_depths = get_data(input);
-    let increasing = depths_increasing(&sonar_depths, 2);
-    // Average of 3 is like a window of 4
-    let threes_increasing = depths_increasing(&sonar_depths, 4);
+pub fn part1(sonar_depths: &[usize]) -> PartOutput<usize> {
+    let increasing = depths_increasing(sonar_depths, 2);
+    PartOutput { answer: increasing }
+}
 
-    DayOutput {
-        answers: Parts(increasing.to_string(), threes_increasing.to_string()),
-        display: Parts(
-            format!(
-                "There are {} measurements larger than the previous measurement",
-                increasing
-            ),
-            format!(
-                "There are {} sums larger than the previous sum",
-                threes_increasing
-            ),
-        ),
-        ..Default::default()
+pub fn part2(sonar_depths: &[usize]) -> PartOutput<usize> {
+    let threes_increasing = depths_increasing(sonar_depths, 4);
+    PartOutput {
+        answer: threes_increasing,
     }
 }
+
+pub const DAY: Day<Vec<usize>, [usize], usize> = Day {
+    title: "Sonar Sweep",
+    display: (
+        "There are {answer} measurements larger than the previous measurement",
+        "There are {answer} sums larger than the previous sum",
+    ),
+    calc: DayCalc {
+        parse: get_data,
+        part1: part1,
+        part2: part2,
+    },
+};
 
 #[cfg(test)]
 mod tests {
@@ -73,8 +76,8 @@ mod tests {
 
     #[test]
     fn test_main() {
-        let day = main(get_input(1));
-        assert_eq!(day.answers.0, "1393");
-        assert_eq!(day.answers.1, "1359");
+        let input = get_data(&get_input(1));
+        assert_eq!(part1(&input).answer.to_string(), "1393");
+        assert_eq!(part2(&input).answer.to_string(), "1359");
     }
 }

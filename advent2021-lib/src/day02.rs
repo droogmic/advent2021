@@ -176,6 +176,7 @@ pub const DAY: Day<Commands, usize> = Day {
         part1,
         part2,
     },
+    example: "forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2",
 };
 
 #[cfg(test)]
@@ -185,17 +186,13 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let result = navigate(&get_data(
-            "forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2".into(),
-        ));
+        let result = navigate(&get_data(DAY.example));
         assert_eq!(result.position * result.depth, 150);
     }
 
     #[test]
     fn test_example_part2() {
-        let result = navigate_aim(&get_data(
-            "forward 5\ndown 5\nforward 8\nup 3\ndown 8\nforward 2".into(),
-        ));
+        let result = navigate_aim(&get_data(DAY.example));
         assert_eq!(result.position * result.depth, 900);
     }
 

@@ -54,6 +54,7 @@ pub const DAY: Day<SonarDepths, usize> = Day {
         part1,
         part2,
     },
+    example: "199\n200\n208\n210\n200\n207\n240\n269\n260\n263",
 };
 
 #[cfg(test)]
@@ -63,19 +64,13 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let result = depths_increasing(
-            &get_data("199\n200\n208\n210\n200\n207\n240\n269\n260\n263".into()),
-            2,
-        );
+        let result = depths_increasing(&get_data(DAY.example), 2);
         assert_eq!(result, 7);
     }
 
     #[test]
     fn test_example_part2() {
-        let result = depths_increasing(
-            &get_data("199\n200\n208\n210\n200\n207\n240\n269\n260\n263".into()),
-            4,
-        );
+        let result = depths_increasing(&get_data(DAY.example), 4);
         assert_eq!(result, 5);
     }
 

@@ -203,14 +203,15 @@ pub fn part2(report: &Report) -> PartOutput<usize> {
 pub const DAY: Day<Report, usize> = Day {
     title: "Dive!",
     display: (
-        "The horizontal position to final depth product is {answer}",
-        "The horizontal position to final depth product is {answer}",
+        "The power consumption of the submarine is {answer}",
+        "The life support rating is {answer}",
     ),
     calc: DayCalc {
         parse: get_binary_rows,
         part1,
         part2,
     },
+    example: "00100\n11110\n10110\n10111\n10101\n01111\n00111\n11100\n10000\n11001\n00010\n01010",
 };
 
 #[cfg(test)]
@@ -219,34 +220,19 @@ mod tests {
     use crate::get_input;
     use test_log::test;
 
-    const EXAMPLE: &str = "\
-00100
-11110
-10110
-10111
-10101
-01111
-00111
-11100
-10000
-11001
-00010
-01010";
-
     #[test]
     fn test_example_part1() {
-        let report = get_binary_rows(EXAMPLE);
+        let report = get_binary_rows(DAY.example);
         let result = get_bitwise_avg(&report);
         assert_eq!(result, 22);
     }
 
     #[test]
     fn test_example_part2() {
-        let report = get_binary_rows(EXAMPLE);
+        let report = get_binary_rows(DAY.example);
         let oxygen_result = get_oxygen_rating(&report);
         assert_eq!(oxygen_result, 23);
         let co2_result = get_co2_rating(&report);
-        log::info!("TEST");
         assert_eq!(co2_result, 10);
     }
 

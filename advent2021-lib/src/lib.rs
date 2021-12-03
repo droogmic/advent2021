@@ -21,6 +21,7 @@ pub struct Day<D, O> {
     pub title: &'static str,
     pub display: (&'static str, &'static str),
     pub calc: DayCalc<D, O>,
+    pub example: &'static str,
 }
 
 pub trait Printable {

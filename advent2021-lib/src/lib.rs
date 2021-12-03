@@ -11,23 +11,23 @@ pub struct PartOutput<O> {
     pub answer: O,
 }
 
-pub struct DayCalc<D, I: ?Sized, O> {
+pub struct DayCalc<D, O> {
     pub parse: fn(&str) -> D,
-    pub part1: fn(&I) -> PartOutput<O>,
-    pub part2: fn(&I) -> PartOutput<O>,
+    pub part1: fn(&D) -> PartOutput<O>,
+    pub part2: fn(&D) -> PartOutput<O>,
 }
 
-pub struct Day<D, I: ?Sized, O> {
+pub struct Day<D, O> {
     pub title: &'static str,
     pub display: (&'static str, &'static str),
-    pub calc: DayCalc<D, I, O>,
+    pub calc: DayCalc<D, O>,
 }
 
 pub trait Printable {
     fn get_display(&self) -> (&'static str, &'static str);
 }
 
-impl<D, I: ?Sized, O> Printable for Day<D, I, O> {
+impl<D, O> Printable for Day<D, O> {
     fn get_display(&self) -> (&'static str, &'static str) {
         self.display
     }
@@ -39,19 +39,19 @@ pub trait Calculable {
     fn both(&self, input: &str) -> (String, String);
 }
 
-impl<D: AsRef<I>, I: ?Sized, O: std::fmt::Display> Calculable for Day<D, I, O> {
+impl<D, O: std::fmt::Display> Calculable for Day<D, O> {
     fn both(&self, input: &str) -> (String, String) {
         let input = (self.calc.parse)(&input.to_string());
         (
-            (self.calc.part1)(input.as_ref()).answer.to_string(),
-            (self.calc.part2)(input.as_ref()).answer.to_string(),
+            (self.calc.part1)(&input).answer.to_string(),
+            (self.calc.part2)(&input).answer.to_string(),
         )
     }
 }
 
 pub trait DayTrait: Printable + Calculable + Send {}
 
-impl<D: AsRef<I>, I: ?Sized, O: std::fmt::Display> DayTrait for Day<D, I, O> {}
+impl<D, O: std::fmt::Display> DayTrait for Day<D, O> {}
 
 pub fn get_days() -> BTreeMap<usize, Box<dyn DayTrait + 'static>> {
     let mut days: BTreeMap<usize, Box<dyn DayTrait + 'static>> = BTreeMap::new();

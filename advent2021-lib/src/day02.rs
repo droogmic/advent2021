@@ -125,41 +125,47 @@ impl Add<&Command> for LocationAim {
     }
 }
 
-pub fn get_data(input: &str) -> Vec<Command> {
-    input
-        .lines()
-        .map(|line| line.parse().expect("Bad Input"))
-        .collect()
+pub struct Commands(Vec<Command>);
+
+pub fn get_data(input: &str) -> Commands {
+    Commands(
+        input
+            .lines()
+            .map(|line| line.parse().expect("Bad Input"))
+            .collect(),
+    )
 }
 
-pub fn navigate(commands: &[Command]) -> Location {
+pub fn navigate(commands: &Commands) -> Location {
     commands
+        .0
         .iter()
         .fold(Location::default(), |location, command| location + command)
 }
 
-pub fn navigate_aim(commands: &[Command]) -> LocationAim {
+pub fn navigate_aim(commands: &Commands) -> LocationAim {
     commands
+        .0
         .iter()
         .fold(LocationAim::default(), |location, command| {
             location + command
         })
 }
 
-pub fn part1(commands: &[Command]) -> PartOutput<usize> {
+pub fn part1(commands: &Commands) -> PartOutput<usize> {
     let location = navigate(commands);
     PartOutput {
         answer: location.position * location.depth,
     }
 }
-pub fn part2(commands: &[Command]) -> PartOutput<usize> {
-    let location = navigate_aim(&commands);
+pub fn part2(commands: &Commands) -> PartOutput<usize> {
+    let location = navigate_aim(commands);
     PartOutput {
         answer: location.position * location.depth,
     }
 }
 
-pub const DAY: Day<Vec<Command>, [Command], usize> = Day {
+pub const DAY: Day<Commands, usize> = Day {
     title: "Dive!",
     display: (
         "The horizontal position to final depth product is {answer}",
@@ -167,8 +173,8 @@ pub const DAY: Day<Vec<Command>, [Command], usize> = Day {
     ),
     calc: DayCalc {
         parse: get_data,
-        part1: part1,
-        part2: part2,
+        part1,
+        part2,
     },
 };
 

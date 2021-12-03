@@ -1,10 +1,14 @@
 use crate::{Day, DayCalc, PartOutput};
 
-pub fn get_data(input: &str) -> Vec<usize> {
-    input
-        .lines()
-        .map(|line| line.parse().expect("bad input"))
-        .collect()
+pub struct SonarDepths(Vec<usize>);
+
+pub fn get_data(input: &str) -> SonarDepths {
+    SonarDepths(
+        input
+            .lines()
+            .map(|line| line.parse().expect("bad input"))
+            .collect(),
+    )
 }
 
 enum MeasurementChange {
@@ -13,8 +17,9 @@ enum MeasurementChange {
     Decreasing,
 }
 
-pub fn depths_increasing(sonar_depths: &[usize], size: usize) -> usize {
+pub fn depths_increasing(sonar_depths: &SonarDepths, size: usize) -> usize {
     sonar_depths
+        .0
         .windows(size)
         .map(|window| match window {
             w if w.first() < w.last() => MeasurementChange::Increasing,
@@ -26,19 +31,19 @@ pub fn depths_increasing(sonar_depths: &[usize], size: usize) -> usize {
         .count()
 }
 
-pub fn part1(sonar_depths: &[usize]) -> PartOutput<usize> {
+pub fn part1(sonar_depths: &SonarDepths) -> PartOutput<usize> {
     let increasing = depths_increasing(sonar_depths, 2);
     PartOutput { answer: increasing }
 }
 
-pub fn part2(sonar_depths: &[usize]) -> PartOutput<usize> {
+pub fn part2(sonar_depths: &SonarDepths) -> PartOutput<usize> {
     let threes_increasing = depths_increasing(sonar_depths, 4);
     PartOutput {
         answer: threes_increasing,
     }
 }
 
-pub const DAY: Day<Vec<usize>, [usize], usize> = Day {
+pub const DAY: Day<SonarDepths, usize> = Day {
     title: "Sonar Sweep",
     display: (
         "There are {answer} measurements larger than the previous measurement",
@@ -46,8 +51,8 @@ pub const DAY: Day<Vec<usize>, [usize], usize> = Day {
     ),
     calc: DayCalc {
         parse: get_data,
-        part1: part1,
-        part2: part2,
+        part1,
+        part2,
     },
 };
 

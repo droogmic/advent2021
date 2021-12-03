@@ -3,7 +3,7 @@ use std::fmt;
 
 use crate::{Day, DayCalc, PartOutput};
 
-struct Numbers(Vec<usize>);
+pub struct Numbers(pub Vec<usize>);
 
 impl fmt::Binary for Numbers {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -25,17 +25,19 @@ impl fmt::Binary for Numbers {
     }
 }
 
-struct Report {
-    numbers: Numbers,
-    width: usize,
+pub struct Report {
+    pub numbers: Numbers,
+    pub width: usize,
 }
 
 pub fn get_binary_rows(input: &str) -> Report {
     Report {
-        numbers: input
-            .lines()
-            .map(|line| usize::from_str_radix(line, 2).expect("invalid binary int"))
-            .collect(),
+        numbers: Numbers(
+            input
+                .lines()
+                .map(|line| usize::from_str_radix(line, 2).expect("invalid binary int"))
+                .collect(),
+        ),
         width: input.lines().next().unwrap().len(),
     }
 }
@@ -43,18 +45,22 @@ pub fn get_binary_rows(input: &str) -> Report {
 /// # Get average bitwise
 ///
 /// ```
-/// let values = vec![
-///     0b1111_1100,
-///     0b1111_0000,
-///     0b1111_0000,
-///     0b1100_0000,
-/// ];
-/// let avg = advent2021_lib::day03::get_bitwise_avg(&values, 8);
+/// let report = advent2021_lib::day03::Report {
+///     numbers: advent2021_lib::day03::Numbers(vec![
+///         0b1111_1100,
+///         0b1111_0000,
+///         0b1111_0000,
+///         0b1100_0000,
+///     ]),
+///     width: 8,
+/// };
+/// let avg = advent2021_lib::day03::get_bitwise_avg(&report);
 /// assert_eq!(avg, 0b1111_0000);
 /// ```
 ///
-pub fn get_bitwise_avg(numbers: &Numbers, row_len: usize) -> usize {
-    let numbers = numbers.0;
+pub fn get_bitwise_avg(report: &Report) -> usize {
+    let numbers = &report.numbers.0;
+    let width = report.width;
     let low_upper_bound_inclusive = numbers
         .len()
         .checked_sub(1)
@@ -67,7 +73,7 @@ pub fn get_bitwise_avg(numbers: &Numbers, row_len: usize) -> usize {
         .unwrap()
         .checked_div(2)
         .unwrap();
-    (0..row_len)
+    (0..width)
         .map(|mask_len| {
             let row_sum = numbers
                 .iter()
@@ -120,19 +126,22 @@ pub enum LifeSupport {
 /// Get rating from largest to smallest bit search, by default it gets the oxygen scrubber rating
 ///
 /// ```
-/// let values = vec![
-///     0b1111_1100,
-///     0b1111_0000,
-///     0b1111_0100,
-///     0b1100_0000,
-/// ];
-/// let avg = advent2021_lib::day03::get_rating(&values, 8, advent2021_lib::day03::LifeSupport::Oxygen);
+/// let report = advent2021_lib::day03::Report {
+///     numbers: advent2021_lib::day03::Numbers(vec![
+///         0b1111_1100,
+///         0b1111_0000,
+///         0b1111_0100,
+///         0b1100_0000,
+///     ]),
+///     width: 8,
+/// };
+/// let avg = advent2021_lib::day03::get_rating(&report, advent2021_lib::day03::LifeSupport::Oxygen);
 /// assert_eq!(avg, 0b1111_0100);
 /// ```
 ///
-pub fn get_rating(report_rows: &[usize], row_len: usize, life_support: LifeSupport) -> usize {
-    let mut report_rows: HashSet<usize> = report_rows.iter().cloned().collect();
-    let mut mask_offset = row_len;
+pub fn get_rating(report: &Report, life_support: LifeSupport) -> usize {
+    let mut report_rows: HashSet<usize> = report.numbers.0.iter().cloned().collect();
+    let mut mask_offset = report.width;
     while report_rows.len() > 1 {
         mask_offset -= 1;
         let low_upper_bound_inclusive = report_rows
@@ -166,32 +175,32 @@ pub fn get_rating(report_rows: &[usize], row_len: usize, life_support: LifeSuppo
     rating
 }
 
-pub fn get_oxygen_rating(report_rows: &Numbers, row_len: usize) -> usize {
-    get_rating(report_rows, row_len, LifeSupport::Oxygen)
+pub fn get_oxygen_rating(report: &Report) -> usize {
+    get_rating(report, LifeSupport::Oxygen)
 }
 
-pub fn get_co2_rating(report_rows: &Numbers, row_len: usize) -> usize {
-    get_rating(report_rows, row_len, LifeSupport::Co2)
+pub fn get_co2_rating(report: &Report) -> usize {
+    get_rating(report, LifeSupport::Co2)
 }
 
 pub fn part1(report: &Report) -> PartOutput<usize> {
-    let gamma_rate = get_bitwise_avg(report.numbers, report.width);
-    let power_consumption = gamma_rate_to_power_rate(gamma_rate, row_len);
+    let gamma_rate = get_bitwise_avg(report);
+    let power_consumption = gamma_rate_to_power_rate(gamma_rate, report.width);
     PartOutput {
         answer: power_consumption,
     }
 }
 
 pub fn part2(report: &Report) -> PartOutput<usize> {
-    let oxygen_rating = get_oxygen_rating(report.numbers, report.width);
-    let co2_rating = get_co2_rating(&report_rows, row_len);
+    let oxygen_rating = get_oxygen_rating(report);
+    let co2_rating = get_co2_rating(report);
     let life_support_rating = oxygen_rating * co2_rating;
     PartOutput {
         answer: life_support_rating,
     }
 }
 
-pub const DAY: Day<Report, Report, usize> = Day {
+pub const DAY: Day<Report, usize> = Day {
     title: "Dive!",
     display: (
         "The horizontal position to final depth product is {answer}",
@@ -199,8 +208,8 @@ pub const DAY: Day<Report, Report, usize> = Day {
     ),
     calc: DayCalc {
         parse: get_binary_rows,
-        part1: part1,
-        part2: part2,
+        part1,
+        part2,
     },
 };
 
@@ -227,24 +236,24 @@ mod tests {
     #[test]
     fn test_example_part1() {
         let report = get_binary_rows(EXAMPLE);
-        let result = get_bitwise_avg(&report.numbers, report.width);
+        let result = get_bitwise_avg(&report);
         assert_eq!(result, 22);
     }
 
     #[test]
     fn test_example_part2() {
         let report = get_binary_rows(EXAMPLE);
-        let oxygen_result = get_oxygen_rating(&report.numbers, report.width);
+        let oxygen_result = get_oxygen_rating(&report);
         assert_eq!(oxygen_result, 23);
-        let co2_result = get_co2_rating(&report.numbers, report.width);
+        let co2_result = get_co2_rating(&report);
         log::info!("TEST");
         assert_eq!(co2_result, 10);
     }
 
     #[test]
     fn test_main() {
-        let day = main(get_input(3));
-        assert_eq!(day.answers.0, "2972336");
-        assert_eq!(day.answers.1, "3368358");
+        let report = get_binary_rows(&get_input(3));
+        assert_eq!(part1(&report).answer.to_string(), "2972336");
+        assert_eq!(part2(&report).answer.to_string(), "3368358");
     }
 }

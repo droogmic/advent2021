@@ -1,5 +1,5 @@
 [workspace]
-members = ["advent2021-lib", "advent2021-bin"]
+members = ["advent2021-lib", "advent2021-bin", "advent2021-web"]
 
 [patch.crates-io]
 recap = { git = "https://github.com/droogmic/recap", branch = "release-0.1.2" }

@@ -1,14 +1,14 @@
-use crate::{Day, DayCalc, PartOutput};
+use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 
 pub struct SonarDepths(Vec<usize>);
 
-pub fn get_data(input: &str) -> SonarDepths {
-    SonarDepths(
+pub fn get_data(input: &str) -> ParseResult<SonarDepths> {
+    Ok(SonarDepths(
         input
             .lines()
-            .map(|line| line.parse().expect("bad input"))
-            .collect(),
-    )
+            .map(|line| line.parse().map_err(|_| ParseError {}))
+            .collect::<ParseResult<_>>()?,
+    ))
 }
 
 enum MeasurementChange {
@@ -64,19 +64,19 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let result = depths_increasing(&get_data(DAY.example), 2);
+        let result = depths_increasing(&get_data(DAY.example).unwrap(), 2);
         assert_eq!(result, 7);
     }
 
     #[test]
     fn test_example_part2() {
-        let result = depths_increasing(&get_data(DAY.example), 4);
+        let result = depths_increasing(&get_data(DAY.example).unwrap(), 4);
         assert_eq!(result, 5);
     }
 
     #[test]
     fn test_main() {
-        let input = get_data(&get_input(1));
+        let input = get_data(&get_input(1)).unwrap();
         assert_eq!(part1(&input).answer.to_string(), "1393");
         assert_eq!(part2(&input).answer.to_string(), "1359");
     }

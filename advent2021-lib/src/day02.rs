@@ -1,7 +1,7 @@
 use std::ops::Add;
 use std::str::FromStr;
 
-use crate::{Day, DayCalc, PartOutput};
+use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 
 #[derive(Debug, Clone)]
 struct DirectionError;
@@ -127,13 +127,13 @@ impl Add<&Command> for LocationAim {
 
 pub struct Commands(Vec<Command>);
 
-pub fn get_data(input: &str) -> Commands {
-    Commands(
+pub fn get_data(input: &str) -> ParseResult<Commands> {
+    Ok(Commands(
         input
             .lines()
-            .map(|line| line.parse().expect("Bad Input"))
-            .collect(),
-    )
+            .map(|line| line.parse().map_err(|_| ParseError {}))
+            .collect::<ParseResult<_>>()?,
+    ))
 }
 
 pub fn navigate(commands: &Commands) -> Location {
@@ -186,19 +186,19 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let result = navigate(&get_data(DAY.example));
+        let result = navigate(&get_data(DAY.example).unwrap());
         assert_eq!(result.position * result.depth, 150);
     }
 
     #[test]
     fn test_example_part2() {
-        let result = navigate_aim(&get_data(DAY.example));
+        let result = navigate_aim(&get_data(DAY.example).unwrap());
         assert_eq!(result.position * result.depth, 900);
     }
 
     #[test]
     fn test_main() {
-        let input = get_data(&get_input(2));
+        let input = get_data(&get_input(2)).unwrap();
         assert_eq!(part1(&input).answer.to_string(), "2027977");
         assert_eq!(part2(&input).answer.to_string(), "1903644897");
     }

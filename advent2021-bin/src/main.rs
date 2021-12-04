@@ -44,13 +44,19 @@ fn main() -> Result<(), Report> {
 
     if args.all {
         for (day_num, day) in days.into_iter() {
-            let (part1, part2) = day.both(&get_input(day_num));
+            let (part1, part2) = day.both(&get_input(day_num)).expect("invalid input");
             print_day(day_num, day.get_display(), (part1, part2));
         }
     } else if args.parallel {
         let threads = get_days().into_iter().map(|(day_num, day)| {
             println!("Spawn day {}", day_num);
-            std::thread::spawn(move || (day_num, day.get_display(), day.both(&get_input(day_num))))
+            std::thread::spawn(move || {
+                (
+                    day_num,
+                    day.get_display(),
+                    day.both(&get_input(day_num)).expect("invalid input"),
+                )
+            })
         });
         std::thread::yield_now();
         std::thread::sleep(std::time::Duration::from_millis(50));
@@ -67,7 +73,7 @@ fn main() -> Result<(), Report> {
             }
             Some(day_num) => (day_num, days.get(&day_num).unwrap()),
         };
-        let (part1, part2) = day.both(&get_input(day_num));
+        let (part1, part2) = day.both(&get_input(day_num)).expect("invalid input");
         print_day(day_num, day.get_display(), (part1, part2));
     }
 

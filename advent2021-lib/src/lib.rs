@@ -7,13 +7,24 @@ pub mod day01;
 pub mod day02;
 pub mod day03;
 
+#[derive(Debug, Clone)]
+pub struct ParseError;
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "invalid input for day")
+    }
+}
+
+pub type ParseResult<D> = std::result::Result<D, ParseError>;
+
 #[derive(Debug, Default)]
 pub struct PartOutput<O> {
     pub answer: O,
 }
 
 pub struct DayCalc<D, O> {
-    pub parse: fn(&str) -> D,
+    pub parse: fn(&str) -> ParseResult<D>,
     pub part1: fn(&D) -> PartOutput<O>,
     pub part2: fn(&D) -> PartOutput<O>,
 }
@@ -44,28 +55,31 @@ impl<D, O> Printable for Day<D, O> {
 }
 
 pub trait Calculable {
-    fn both(&self, input: &str) -> (String, String);
-    fn get_both_func(&self) -> Rc<dyn Fn(&str) -> (String, String)>;
+    fn both(&self, input: &str) -> ParseResult<(String, String)>;
+    fn get_both_func(&self) -> Rc<dyn Fn(&str) -> ParseResult<(String, String)>>;
 }
 
 impl<D: 'static, O: 'static + std::fmt::Display> Calculable for Day<D, O> {
-    fn both(&self, input: &str) -> (String, String) {
-        let input = (self.calc.parse)(&input.to_string());
-        (
-            (self.calc.part1)(&input).answer.to_string(),
-            (self.calc.part2)(&input).answer.to_string(),
-        )
+    fn both(&self, input: &str) -> ParseResult<(String, String)> {
+        let parse = self.calc.parse;
+        let part1 = self.calc.part1;
+        let part2 = self.calc.part2;
+        let input = parse(&input.to_string())?;
+        Ok((
+            part1(&input).answer.to_string(),
+            part2(&input).answer.to_string(),
+        ))
     }
-    fn get_both_func(&self) -> Rc<dyn Fn(&str) -> (String, String)> {
+    fn get_both_func(&self) -> Rc<dyn Fn(&str) -> ParseResult<(String, String)>> {
         let parse = self.calc.parse;
         let part1 = self.calc.part1;
         let part2 = self.calc.part2;
         Rc::new(move |input: &str| {
-            let input = parse(&input.to_string());
-            (
+            let input = parse(&input.to_string())?;
+            Ok((
                 part1(&input).answer.to_string(),
                 part2(&input).answer.to_string(),
-            )
+            ))
         })
     }
 }

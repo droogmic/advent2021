@@ -5,6 +5,8 @@ use yew::prelude::*;
 use yew::services::reader::{File, FileData, ReaderService, ReaderTask};
 use yew::Properties;
 
+use advent2021_lib::ParseResult;
+
 #[derive(Properties, Clone)]
 pub struct DayProps {
     pub day_num: usize,
@@ -12,7 +14,7 @@ pub struct DayProps {
     pub example: String,
     #[prop_or_default]
     pub show_input: bool,
-    pub both_func: Rc<dyn Fn(&str) -> (String, String)>,
+    pub both_func: Rc<dyn Fn(&str) -> ParseResult<(String, String)>>,
     pub text_format: (&'static str, &'static str),
     #[prop_or_default]
     pub messages: Vec<String>,
@@ -53,17 +55,25 @@ impl Component for Day {
                 log::info!("Running Example");
                 let day_func = self.props.both_func.clone();
                 let result = day_func(&self.props.example);
-                let part1 = format!(
-                    "Part 1: {}",
-                    self.props.text_format.0.replace("{answer}", &result.0)
-                );
-                let part2 = format!(
-                    "Part 2: {}",
-                    self.props.text_format.1.replace("{answer}", &result.1)
-                );
-                log::info!("{}", part1);
-                log::info!("{}", part2);
-                self.props.messages = vec![part1, part2];
+                match result {
+                    Err(_e) => {
+                        log::error!("parsing error...");
+                        self.props.messages = vec!["Parsing error, please try again...".to_owned()]
+                    }
+                    Ok(answer) => {
+                        let part1 = format!(
+                            "Part 1: {}",
+                            self.props.text_format.0.replace("{answer}", &answer.0)
+                        );
+                        let part2 = format!(
+                            "Part 2: {}",
+                            self.props.text_format.1.replace("{answer}", &answer.1)
+                        );
+                        log::info!("{}", part1);
+                        log::info!("{}", part2);
+                        self.props.messages = vec![part1, part2];
+                    }
+                }
                 true
             }
             Msg::File(Some(file)) => {

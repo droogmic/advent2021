@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use std::fmt;
 
-use crate::{Day, DayCalc, PartOutput};
+use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 
 pub struct Numbers(pub Vec<usize>);
 
@@ -30,16 +30,16 @@ pub struct Report {
     pub width: usize,
 }
 
-pub fn get_binary_rows(input: &str) -> Report {
-    Report {
+pub fn get_report(input: &str) -> ParseResult<Report> {
+    Ok(Report {
         numbers: Numbers(
             input
                 .lines()
-                .map(|line| usize::from_str_radix(line, 2).expect("invalid binary int"))
-                .collect(),
+                .map(|line| usize::from_str_radix(line, 2).map_err(|_| ParseError {}))
+                .collect::<ParseResult<_>>()?,
         ),
         width: input.lines().next().unwrap().len(),
-    }
+    })
 }
 
 /// # Get average bitwise
@@ -142,6 +142,10 @@ pub enum LifeSupport {
 pub fn get_rating(report: &Report, life_support: LifeSupport) -> usize {
     let mut report_rows: HashSet<usize> = report.numbers.0.iter().cloned().collect();
     let mut mask_offset = report.width;
+    log::info!(
+        "rating  {:b}",
+        Numbers(report_rows.iter().cloned().collect())
+    );
     while report_rows.len() > 1 {
         mask_offset -= 1;
         let low_upper_bound_inclusive = report_rows
@@ -169,7 +173,10 @@ pub fn get_rating(report: &Report, life_support: LifeSupport) -> usize {
             LifeSupport::Co2 => 1 - bit_to_keep,
         };
         report_rows.retain(|number| ((number >> mask_offset) & 1) == bit_to_keep);
-        log::info!("{:b}", Numbers(report_rows.iter().cloned().collect()));
+        log::info!(
+            "        {:b}",
+            Numbers(report_rows.iter().cloned().collect())
+        );
     }
     let rating = report_rows.drain().next().unwrap();
     rating
@@ -207,7 +214,7 @@ pub const DAY: Day<Report, usize> = Day {
         "The life support rating is {answer}",
     ),
     calc: DayCalc {
-        parse: get_binary_rows,
+        parse: get_report,
         part1,
         part2,
     },
@@ -222,14 +229,14 @@ mod tests {
 
     #[test]
     fn test_example_part1() {
-        let report = get_binary_rows(DAY.example);
+        let report = get_report(DAY.example).unwrap();
         let result = get_bitwise_avg(&report);
         assert_eq!(result, 22);
     }
 
     #[test]
     fn test_example_part2() {
-        let report = get_binary_rows(DAY.example);
+        let report = get_report(DAY.example).unwrap();
         let oxygen_result = get_oxygen_rating(&report);
         assert_eq!(oxygen_result, 23);
         let co2_result = get_co2_rating(&report);
@@ -238,7 +245,7 @@ mod tests {
 
     #[test]
     fn test_main() {
-        let report = get_binary_rows(&get_input(3));
+        let report = get_report(&get_input(3)).unwrap();
         assert_eq!(part1(&report).answer.to_string(), "2972336");
         assert_eq!(part2(&report).answer.to_string(), "3368358");
     }

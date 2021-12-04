@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 recap = "0.1.2"
 log = "0.4"
+ndarray = "0.15"
 
 [dev-dependencies]
 criterion = "0.3"

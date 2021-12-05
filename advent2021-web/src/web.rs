@@ -126,19 +126,10 @@ impl Component for Day {
                     <div class="row-item day-title"><h2><em>{&self.props.title}</em></h2></div>
                     <div class="row-item day-url"><a href={format!("https://github.com/droogmic/advent2021/blob/master/advent2021-lib/src/day{:02}.rs", self.props.day_num)}>{"Source Code"}</a></div>
                 </div>
-                <div class="row">
-                    <div class="row-item"><h5 class="button" onclick=self.link.callback(|_| Msg::Collapse)>{
-                        if self.props.show_input {
-                            "▼ Example: "
-                        } else {
-                            "▶ Example: "
-                        }
-                    }</h5></div>
-                    <div class="row-item">
-                        <button type="button" onclick=self.link.callback(|_| Msg::RunExample)>{ "Run..." }</button>
-                    </div>
-                    <div class="row-item">
-                        <input type="file" onchange=self.link.callback(move |value| {
+                <div class="row row-reverse">
+                    <div class="row-item day-file">
+                        <label for="file-upload" class="custom-file-upload">{"📄 Upload..."}</label>
+                        <input id="file-upload" type="file" onchange=self.link.callback(move |value| {
                             if let ChangeData::Files(files) = value {
                                 assert_eq!(files.length(), 1);
                                 let file = files
@@ -148,6 +139,20 @@ impl Component for Day {
                             }
                             Msg::File(None)
                         }) />
+                    </div>    
+                    <div class="row-item day-run">
+                        <button type="button" onclick=self.link.callback(|_| Msg::RunExample)>{ "Run..." }</button>
+                    </div>
+                    <div class="row-item day-collapse">
+                        <h5 class="button" onclick=self.link.callback(|_| Msg::Collapse)>
+                        {
+                            if self.props.show_input {
+                                "▼ Example: "
+                            } else {
+                                "▬ Example: "
+                            }
+                        }
+                        </h5>
                     </div>
                 </div>
                     {

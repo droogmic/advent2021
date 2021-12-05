@@ -78,6 +78,7 @@ impl Component for Day {
             }
             Msg::File(Some(file)) => {
                 let file_name = file.name();
+                log::info!("loading file '{}'...", file_name);
                 let task = {
                     let callback = self.link.callback(Msg::Loaded);
                     ReaderService::read_file(file, callback).unwrap()
@@ -97,6 +98,7 @@ impl Component for Day {
                 .to_owned();
                 self.props.example = s;
                 let _ = self.tasks.remove(&file.name).expect("no file removed");
+                log::info!("loaded file '{}'...", file.name);
                 true
             }
             Msg::Collapse => {
@@ -119,6 +121,7 @@ impl Component for Day {
     }
 
     fn view(&self) -> Html {
+        let file_upload_id = format!("file-upload-day-{}", self.props.day_num);
         html! {
             <section class={if self.props.day_num&1 != 0 { "day-odd" } else { "day-even" }}>
                 <div class="row">
@@ -128,8 +131,8 @@ impl Component for Day {
                 </div>
                 <div class="row row-reverse">
                     <div class="row-item day-file">
-                        <label for="file-upload" class="custom-file-upload">{"📄 Upload..."}</label>
-                        <input id="file-upload" type="file" onchange=self.link.callback(move |value| {
+                        <label for={file_upload_id.clone()} class="custom-file-upload">{"📄 Upload..."}</label>
+                        <input id={file_upload_id.clone()} type="file" onchange=self.link.callback(move |value| {
                             if let ChangeData::Files(files) = value {
                                 assert_eq!(files.length(), 1);
                                 let file = files
@@ -141,7 +144,7 @@ impl Component for Day {
                         }) />
                     </div>    
                     <div class="row-item day-run">
-                        <button type="button" onclick=self.link.callback(|_| Msg::RunExample)>{ "Run..." }</button>
+                        <button type="button" onclick=self.link.callback(|_| Msg::RunExample)>{ "▶ Run..." }</button>
                     </div>
                     <div class="row-item day-collapse">
                         <h5 class="button" onclick=self.link.callback(|_| Msg::Collapse)>

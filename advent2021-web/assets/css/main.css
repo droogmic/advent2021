@@ -4,6 +4,15 @@ body {
   font-family: "Source Code Pro", monospace;
 }
 
+section {
+  padding: 1em 0em;
+  margin: 0em;
+}
+
+section.day-even {
+  background: #22222b;
+}
+
 h1 {
   color: rgb(0, 204, 0);
   font-weight: 400;
@@ -14,9 +23,9 @@ h1 {
   white-space: nowrap;
   -moz-text-size-adjust: none
 }
-
-button {
-  margin-left: 1em;
+h2, h3, h4, h5 {
+  padding: 0;
+  margin: 0;
 }
 
 pre {
@@ -28,34 +37,62 @@ pre {
   font-family: monospace;
   font-size: 12px;
   line-height: 1.6;
-  margin-bottom: 1.6em;
-  margin-left: 2em;
-  max-width: 100%;
+  max-width: 80em;
   overflow: auto;
-  padding: 0.5em 0.5em;
   display: block;
   word-wrap: break-word;
+  padding: 0.2em 0.5em;
+  margin: 0 0 0 4em;
 }
 
-/* Style the button that is used to open and close the collapsible content */
-.collapsible {
+button, input, .button {
+  background-color: #323253;
+  border: none;
+  color: white;
   cursor: pointer;
-  padding: 1em 1em;
+  display: inline-block;
+  padding: 0.5em 1em;
+  text-align: center;
+  text-decoration: none;
 }
-
-/* Add a background color to the button if it is clicked on (add the .active class with JS), and when you move the mouse over it (hover) */
-.active, .collapsible:hover {
+button:hover, input:hover, .button:hover {
   background-color: #333;
 }
-
-/* Style the collapsible content. Note: hidden by default */
-.content {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
-  background-color: #f1f1f1;
+button:active, input:active, .button:active {
+  background-color: rgb(78, 18, 18);
 }
 
 p {
+  padding: 0  ;
+  margin: 0 0 0 4em;
+  font-size: 12px;  
+}
+
+a {
   padding: 0 18px;
+}
+a:link {
+  color: #ccc;
+}
+a:visited {
+  color: #b99
+}
+
+.row {
+  display: flex;
+  max-width: 1060px;
+}
+.row-item {
+  padding: 0;
+  margin: 0 1em;
+  align-self: center
+}
+.row-item.day-key {
+  flex: 0 1 auto
+}
+.row-item.day-title {
+  flex: 1 1 auto
+}
+.row-item.day-url {
+  flex: 0 1 none
 }

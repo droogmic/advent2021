@@ -120,22 +120,36 @@ impl Component for Day {
 
     fn view(&self) -> Html {
         html! {
-            <div>
-                <h2>{"Day "}{self.props.day_num}{": "}<em>{&self.props.title}</em></h2>
-                    <h3 type="button" class="collapsible" onclick=self.link.callback(|_| Msg::Collapse)>
-                        {"Example: "}
+            <section class={if self.props.day_num&1 != 0 { "day-odd" } else { "day-even" }}>
+                <div class="row">
+                    <div class="row-item day-key"><h4>{"Day "}{self.props.day_num}{":"}</h4></div>
+                    <div class="row-item day-title"><h2><em>{&self.props.title}</em></h2></div>
+                    <div class="row-item day-url"><a href={format!("https://github.com/droogmic/advent2021/blob/master/advent2021-lib/src/day{:02}.rs", self.props.day_num)}>{"Source Code"}</a></div>
+                </div>
+                <div class="row">
+                    <div class="row-item"><h5 class="button" onclick=self.link.callback(|_| Msg::Collapse)>{
+                        if self.props.show_input {
+                            "▼ Example: "
+                        } else {
+                            "▶ Example: "
+                        }
+                    }</h5></div>
+                    <div class="row-item">
+                        <button type="button" onclick=self.link.callback(|_| Msg::RunExample)>{ "Run..." }</button>
+                    </div>
+                    <div class="row-item">
                         <input type="file" onchange=self.link.callback(move |value| {
-                                if let ChangeData::Files(files) = value {
-                                    assert_eq!(files.length(), 1);
-                                    let file = files
-                                        .get(0)
-                                        .unwrap();
-                                    return Msg::File(Some(file))
-                                }
-                                Msg::File(None)
-                            })
-                        />
-                    </h3>
+                            if let ChangeData::Files(files) = value {
+                                assert_eq!(files.length(), 1);
+                                let file = files
+                                    .get(0)
+                                    .unwrap();
+                                return Msg::File(Some(file))
+                            }
+                            Msg::File(None)
+                        }) />
+                    </div>
+                </div>
                     {
                         if self.props.show_input {
                             html! {
@@ -147,7 +161,6 @@ impl Component for Day {
                             }
                         }
                     }
-                    <button onclick=self.link.callback(|_| Msg::RunExample)>{ "run" }</button>
                     {
                         for self.props.messages.iter().map(|message| {
                             html! {
@@ -155,7 +168,7 @@ impl Component for Day {
                             }
                         })
                     }
-            </div>
+            </section>
         }
     }
 }

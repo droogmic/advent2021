@@ -61,43 +61,26 @@ pub fn plot(lines: &Lines, diag: bool) -> Vents {
     for line in &lines.0 {
         let min_x = std::cmp::min(line.start_x, line.end_x);
         let max_x = std::cmp::max(line.start_x, line.end_x);
-        let diff_x = max_x - min_x;
+        let diff_x = i128::try_from(line.end_x).unwrap() - i128::try_from(line.start_x).unwrap();
+        let step_x: isize = diff_x.signum().try_into().unwrap();
         let min_y = std::cmp::min(line.start_y, line.end_y);
         let max_y = std::cmp::max(line.start_y, line.end_y);
-        let diff_y = max_y - min_y;
-        let (start, end, get_key) = if diff_y == 0 {
-            (
-                min_x,
-                max_x,
-                Box::new(|point| (point, line.start_y)) as Box<dyn Fn(usize) -> (usize, usize)>,
-            )
-        } else if diff_x == 0 {
-            (
-                min_y,
-                max_y,
-                Box::new(|point| (line.start_x, point)) as Box<dyn Fn(usize) -> (usize, usize)>,
-            )
-        } else if !diag && diff_x == diff_y {
+        let diff_y = i128::try_from(line.end_y).unwrap() - i128::try_from(line.start_y).unwrap();
+        let step_y: isize = diff_y.signum().try_into().unwrap();
+        if !diag && step_x != 0 && step_y != 0 {
             continue;
-        } else if diag && diff_x == diff_y {
-            let asc_x = line.start_x == min_x;
-            let asc_y = line.start_y == min_y;
-            (
-                0,
-                diff_x,
-                if asc_x ^ asc_y {
-                    Box::new(|p| (min_x + p, max_y - p)) as Box<dyn Fn(usize) -> (usize, usize)>
-                } else {
-                    Box::new(|p| (min_x + p, min_y + p)) as Box<dyn Fn(usize) -> (usize, usize)>
-                },
-            )
-        } else {
-            panic!("unrecognised line direction")
-        };
-        for p in start..=end {
+        }
+        for p in 0..=std::cmp::max(max_x - min_x, max_y - min_y) {
             vents
                 .0
-                .entry(get_key(p))
+                .entry((
+                    line.start_x
+                        .checked_add_signed(step_x.checked_mul(p.try_into().unwrap()).unwrap())
+                        .unwrap(),
+                    line.start_y
+                        .checked_add_signed(step_y.checked_mul(p.try_into().unwrap()).unwrap())
+                        .unwrap(),
+                ))
                 .and_modify(|count| *count += 1)
                 .or_insert(1);
         }

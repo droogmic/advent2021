@@ -61,7 +61,7 @@ fn main() -> Result<(), Report> {
         std::thread::yield_now();
         std::thread::sleep(std::time::Duration::from_millis(50));
         println!();
-        for thread in threads.into_iter() {
+        for thread in threads {
             let (day_num, display, (part1, part2)) = thread.join().unwrap();
             print_day(day_num, display, (part1, part2));
         }

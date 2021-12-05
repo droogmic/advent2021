@@ -1,3 +1,5 @@
+#![feature(mixed_integer_ops)]
+
 use std::collections::btree_map::BTreeMap;
 use std::format;
 use std::fs;

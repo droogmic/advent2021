@@ -1,7 +1,10 @@
+body, h1, h2, h3, h4, h5, a, button, input {
+  font-family: "Source Code Pro", monospace;
+}
+
 body {
   background: #0e0e16;
   color: #cccccc;
-  font-family: "Source Code Pro", monospace;
 }
 
 section {
@@ -45,21 +48,26 @@ pre {
   margin: 0 0 0 4em;
 }
 
-button, input, .button {
+button, input, .button, .custom-file-upload {
   background-color: #323253;
   border: none;
   color: white;
   cursor: pointer;
   display: inline-block;
   padding: 0.5em 1em;
+  margin: 0.2em;
   text-align: center;
   text-decoration: none;
+  font-size: 14px;
 }
 button:hover, input:hover, .button:hover {
   background-color: #333;
 }
 button:active, input:active, .button:active {
   background-color: rgb(78, 18, 18);
+}
+input[type="file"] {
+  display: none;
 }
 
 p {
@@ -69,7 +77,7 @@ p {
 }
 
 a {
-  padding: 0 18px;
+  padding: 0 1em;
 }
 a:link {
   color: #ccc;
@@ -80,7 +88,11 @@ a:visited {
 
 .row {
   display: flex;
-  max-width: 1060px;
+  flex-wrap: wrap;
+  max-width: 1040px;
+}
+.row-reverse {
+  flex-direction: row-reverse;
 }
 .row-item {
   padding: 0;
@@ -94,5 +106,14 @@ a:visited {
   flex: 1 1 auto
 }
 .row-item.day-url {
+  flex: 0 1 none
+}
+.row-item.day-collapse {
+  flex: 0 1 auto
+}
+.row-item.day-run {
+  flex: 1 1 auto
+}
+.row-item.day-upload {
   flex: 0 1 none
 }

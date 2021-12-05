@@ -61,9 +61,9 @@ pub fn get_bingo(input: &str) -> ParseResult<Bingo> {
     let mut lines = input.lines();
     let numbers = lines
         .next()
-        .ok_or(ParseError {})?
+        .ok_or(ParseError::Empty)?
         .split(',')
-        .map(|element| element.parse().map_err(|_| ParseError))
+        .map(|element| element.parse().map_err(ParseError::Int))
         .collect::<ParseResult<Vec<usize>>>()?;
     log::debug!("numbers: {:?}", numbers);
     let board_lines = lines
@@ -71,14 +71,14 @@ pub fn get_bingo(input: &str) -> ParseResult<Bingo> {
         .collect::<Vec<&str>>();
     let mut board_lines = board_lines.split(|line| line.is_empty()).peekable();
     let board_size = {
-        let &first = board_lines.peek().ok_or(ParseError)?;
+        let &first = board_lines.peek().ok_or(ParseError::Empty)?;
         log::debug!("first board: {:#?}", first);
         Ok((
             first.len(),
             first
                 .iter()
                 .next()
-                .ok_or(ParseError)?
+                .ok_or(ParseError::Empty)?
                 .split_whitespace()
                 .count(),
         ))
@@ -97,7 +97,7 @@ pub fn get_bingo(input: &str) -> ParseResult<Bingo> {
                                 mark: Marked::Unmarked,
                             }
                         }
-                        Err(_) => return Err(ParseError),
+                        Err(_) => return Err(ParseError::Empty),
                     }
                 }
             }

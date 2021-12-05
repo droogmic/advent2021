@@ -35,7 +35,7 @@ pub fn get_report(input: &str) -> ParseResult<Report> {
         numbers: Numbers(
             input
                 .lines()
-                .map(|line| usize::from_str_radix(line, 2).map_err(|_| ParseError {}))
+                .map(|line| usize::from_str_radix(line, 2).map_err(ParseError::Int))
                 .collect::<ParseResult<_>>()?,
         ),
         width: input.lines().next().unwrap().len(),

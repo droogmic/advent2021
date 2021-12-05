@@ -131,7 +131,7 @@ pub fn get_data(input: &str) -> ParseResult<Commands> {
     Ok(Commands(
         input
             .lines()
-            .map(|line| line.parse().map_err(|_| ParseError {}))
+            .map(|line| line.parse().map_err(|_| ParseError::Empty))
             .collect::<ParseResult<_>>()?,
     ))
 }

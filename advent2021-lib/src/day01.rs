@@ -6,7 +6,7 @@ pub fn get_data(input: &str) -> ParseResult<SonarDepths> {
     Ok(SonarDepths(
         input
             .lines()
-            .map(|line| line.parse().map_err(|_| ParseError {}))
+            .map(|line| line.parse().map_err(ParseError::Int))
             .collect::<ParseResult<_>>()?,
     ))
 }

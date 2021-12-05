@@ -7,9 +7,14 @@ pub mod day01;
 pub mod day02;
 pub mod day03;
 pub mod day04;
+pub mod day05;
 
 #[derive(Debug, Clone)]
-pub struct ParseError;
+pub enum ParseError {
+    Empty,
+    Int(std::num::ParseIntError),
+    Str(String),
+}
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -95,6 +100,7 @@ pub fn get_days() -> BTreeMap<usize, Box<dyn DayTrait + 'static>> {
     days.insert(2, Box::new(day02::DAY));
     days.insert(3, Box::new(day03::DAY));
     days.insert(4, Box::new(day04::DAY));
+    days.insert(5, Box::new(day05::DAY));
     days
 }
 

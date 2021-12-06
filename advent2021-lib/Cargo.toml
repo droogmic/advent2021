@@ -17,3 +17,7 @@ test-log = "0.2"
 [[bench]]
 name = "benchmark_day01"
 harness = false
+
+[[bench]]
+name = "benchmark_day06"
+harness = false

@@ -15,7 +15,7 @@ pub fn part2(something: &Something) -> PartOutput<usize> {
     PartOutput { answer: 0 }
 }
 
-pub const DAY: Day<BingoResult, usize> = Day {
+pub const DAY: Day<Something, usize> = Day {
     title: "TITLE",
     display: (
         "Foobar foobar foobar {answer}",

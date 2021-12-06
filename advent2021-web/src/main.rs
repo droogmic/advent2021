@@ -60,7 +60,7 @@ impl Component for Model {
 }
 
 fn main() {
-    console_log::init_with_level(log::Level::Trace).expect("logging failed");
+    console_log::init_with_level(log::Level::Info).expect("logging failed");
     log::trace!("Initializing yew...");
     yew::start_app::<Model>();
 }

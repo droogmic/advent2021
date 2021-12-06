@@ -84,7 +84,7 @@ pub fn plot(lines: &Lines, diag: bool) -> Vents {
                 .and_modify(|count| *count += 1)
                 .or_insert(1);
         }
-        log::debug!("incrementing {:?}\n{:#?}", line, vents);
+        log::trace!("incrementing {:?}\n{:#?}", line, vents);
     }
     vents
 }

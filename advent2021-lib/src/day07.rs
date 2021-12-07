@@ -101,10 +101,10 @@ mod tests {
         assert_eq!(result, 168);
     }
 
-    // #[test]
-    // fn test_main() {
-    //     let positions = parse(&get_input(7)).unwrap();
-    //     assert_eq!(part1(&positions).answer.to_string(), "-1");
-    //     assert_eq!(part2(&positions).answer.to_string(), "-1");
-    // }
+    #[test]
+    fn test_main() {
+        let positions = parse(&get_input(7)).unwrap();
+        assert_eq!(part1(&positions).answer.to_string(), "355764");
+        assert_eq!(part2(&positions).answer.to_string(), "99634572");
+    }
 }

@@ -1,4 +1,5 @@
 #![feature(mixed_integer_ops)]
+#![feature(int_abs_diff)]
 
 use std::collections::btree_map::BTreeMap;
 use std::format;
@@ -11,6 +12,7 @@ pub mod day03;
 pub mod day04;
 pub mod day05;
 pub mod day06;
+pub mod day07;
 
 #[derive(Debug, Clone)]
 pub enum ParseError {
@@ -105,6 +107,7 @@ pub fn get_days() -> BTreeMap<usize, Box<dyn DayTrait + 'static>> {
     days.insert(4, Box::new(day04::DAY));
     days.insert(5, Box::new(day05::DAY));
     days.insert(6, Box::new(day06::DAY));
+    days.insert(7, Box::new(day07::DAY));
     days
 }
 

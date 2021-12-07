@@ -70,8 +70,8 @@ pub fn part2(positions: &CrabPositions) -> PartOutput<usize> {
 pub const DAY: Day<CrabPositions, usize> = Day {
     title: "The Treachery of Whales",
     display: (
-        "The crab used {answer} fuel to align",
-        "Foobar foobar foobar {answer}",
+        "The crabs used {answer} fuel to align",
+        "The crabs used {answer} fuel to align",
     ),
     calc: DayCalc {
         parse: parse,

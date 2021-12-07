@@ -142,15 +142,19 @@ impl Component for Day {
                             }
                             Msg::File(None)
                         }) />
-                    </div>    
+                    </div>
                     <div class="row-item day-run">
                         <button type="button" onclick=self.link.callback(|_| Msg::RunExample)>{ "▶ Run..." }</button>
                     </div>
                     <div class="row-item day-collapse">
-                        <h5 class="button" onclick=self.link.callback(|_| Msg::Collapse)>
+                        <h5 class={if self.props.example.lines().count() > 1 {"button"} else {"button disabled"}} onclick=self.link.callback(|_| Msg::Collapse)>
                         {
-                            if self.props.show_input {
-                                "▼ Example: "
+                            if self.props.example.lines().count() > 1 {
+                                if self.props.show_input {
+                                    "▼ Example: "
+                                } else {
+                                    "▬ Example: "
+                                }
                             } else {
                                 "▬ Example: "
                             }
@@ -165,7 +169,9 @@ impl Component for Day {
                             }
                         } else {
                             html! {
-                                <pre>{self.props.example.lines().next().unwrap()}{"\n..."}</pre>
+                                <pre class={if self.props.example.lines().count() > 1 {"collapsed"} else {""}}>
+                                    {self.props.example.lines().next().unwrap()}
+                                </pre>
                             }
                         }
                     }

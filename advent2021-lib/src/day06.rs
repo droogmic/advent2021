@@ -108,7 +108,7 @@ pub fn part2(state: &LanternfishState) -> PartOutput<usize> {
 }
 
 pub const DAY: Day<LanternfishState, usize> = Day {
-    title: "TITLE",
+    title: "Lanternfish",
     display: (
         "{answer} lanternfish after 80 days",
         "{answer} lanternfish after 256 days",

@@ -164,10 +164,10 @@ mod tests {
         assert_eq!(result, 1134);
     }
 
-    // #[test]
-    // fn test_main() {
-    //     let something = parse(&get_input(9)).unwrap();
-    //     assert_eq!(part1(&something).answer.to_string(), "-1");
-    //     assert_eq!(part2(&something).answer.to_string(), "-1");
-    // }
+    #[test]
+    fn test_main() {
+        let something = parse(&get_input(9)).unwrap();
+        assert_eq!(part1(&something).answer.to_string(), "600");
+        assert_eq!(part2(&something).answer.to_string(), "987840");
+    }
 }

@@ -32,8 +32,7 @@ pub fn fish_step(state: Vec<usize>) -> Vec<usize> {
     state.into_iter().flat_map(get_fish_step_state).collect()
 }
 /// Naïve solution.
-pub fn fish_steps(state: Vec<usize>, n: usize) -> Vec<usize> {
-    let mut state = state.clone();
+pub fn fish_steps(mut state: Vec<usize>, n: usize) -> Vec<usize> {
     for _ in 0..n {
         state = fish_step(state);
     }
@@ -48,7 +47,7 @@ pub fn fish_steps(state: Vec<usize>, n: usize) -> Vec<usize> {
 /// ```
 pub fn fish_count_array(state: &[usize], n: usize) -> usize {
     fn fish_count(counts: [usize; 9]) -> [usize; 9] {
-        return [
+        [
             counts[1],
             counts[2],
             counts[3],
@@ -58,11 +57,11 @@ pub fn fish_count_array(state: &[usize], n: usize) -> usize {
             counts[7] + counts[0],
             counts[8],
             counts[0],
-        ];
+        ]
     }
     let mut counts = [0; 9];
-    for num in 0..9 {
-        counts[num] = state.iter().filter(|&&fish| fish == num).count();
+    for (num, count) in counts.iter_mut().enumerate() {
+        *count = state.iter().filter(|&&fish| fish == num).count();
     }
     for _ in 0..n {
         counts = fish_count(counts);
@@ -114,7 +113,7 @@ pub const DAY: Day<LanternfishState, usize> = Day {
         "{answer} lanternfish after 256 days",
     ),
     calc: DayCalc {
-        parse: parse,
+        parse,
         part1,
         part2,
     },

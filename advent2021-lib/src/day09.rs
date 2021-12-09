@@ -5,13 +5,9 @@ use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 #[derive(Clone, Default, Debug)]
 pub struct Heightmap {
     map: HashMap<(usize, usize), usize>,
-    height: usize,
-    width: usize,
 }
 
 pub fn parse(input: &str) -> ParseResult<Heightmap> {
-    let width = input.lines().next().ok_or(ParseError::Empty)?.len();
-    let height = input.lines().count();
     let mut map = HashMap::new();
     for (row_idx, row) in input.lines().enumerate() {
         for (col_idx, num) in row.chars().enumerate() {
@@ -21,7 +17,7 @@ pub fn parse(input: &str) -> ParseResult<Heightmap> {
             );
         }
     }
-    Ok(Heightmap { map, height, width })
+    Ok(Heightmap { map })
 }
 
 pub fn get_risk(heightmap: &Heightmap) -> usize {
@@ -62,7 +58,7 @@ pub fn get_risk(heightmap: &Heightmap) -> usize {
 pub fn basin_walk(heightmap: &Heightmap) -> usize {
     let mut basins: HashMap<(usize, usize), usize> = HashMap::new();
     for (pos, _) in heightmap.map.iter() {
-        let mut walk = pos.clone();
+        let mut walk = *pos;
         loop {
             let from_height = heightmap.map.get(&(walk.0, walk.1)).unwrap();
             if *from_height == 9 {
@@ -119,7 +115,7 @@ pub fn basin_walk(heightmap: &Heightmap) -> usize {
     let mut sizes: Vec<usize> = basins.iter().map(|(_basin, size)| *size).collect();
     sizes.sort_unstable();
     log::debug!("basins: {:?}", basins);
-    return sizes.pop().unwrap() * sizes.pop().unwrap() * sizes.pop().unwrap();
+    sizes.pop().unwrap() * sizes.pop().unwrap() * sizes.pop().unwrap()
 }
 
 pub fn part1(heightmap: &Heightmap) -> PartOutput<usize> {
@@ -141,7 +137,7 @@ pub const DAY: Day<Heightmap, usize> = Day {
         "The product of the three largest basins is {answer}",
     ),
     calc: DayCalc {
-        parse: parse,
+        parse,
         part1,
         part2,
     },

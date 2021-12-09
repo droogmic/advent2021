@@ -245,10 +245,7 @@ pub fn get_outputs(display_observations: &DisplayObservations) -> Vec<usize> {
                         .into_iter()
                         .map(|wire| wire_to_segment[wire])
                         .collect();
-                    (0..=9)
-                        .filter(|&number| measurement_segments == number_to_segments(number))
-                        .next()
-                        .is_some()
+                    (0..=9).any(|number| measurement_segments == number_to_segments(number))
                 }) {
                     best_wire_to_segment = wire_to_segment;
                     break;
@@ -266,8 +263,7 @@ pub fn get_outputs(display_observations: &DisplayObservations) -> Vec<usize> {
                         .map(|wire| best_wire_to_segment[wire])
                         .collect();
                     (0..=9)
-                        .filter(|&number| output_segments == number_to_segments(number))
-                        .next()
+                        .find(|&number| output_segments == number_to_segments(number))
                         .unwrap()
                 })
                 .fold((0, 1000), |acc, val| (acc.0 + acc.1 * val, acc.1 / 10))
@@ -280,13 +276,13 @@ pub fn get_outputs(display_observations: &DisplayObservations) -> Vec<usize> {
 
 pub fn part1(display_observations: &DisplayObservations) -> PartOutput<usize> {
     PartOutput {
-        answer: count_1s_4s_7s_8s(&display_observations),
+        answer: count_1s_4s_7s_8s(display_observations),
     }
 }
 
 pub fn part2(display_observations: &DisplayObservations) -> PartOutput<usize> {
     PartOutput {
-        answer: get_outputs(&display_observations).iter().sum::<usize>(),
+        answer: get_outputs(display_observations).iter().sum::<usize>(),
     }
 }
 
@@ -297,7 +293,7 @@ pub const DAY: Day<DisplayObservations, usize> = Day {
         "Foobar foobar foobar {answer}",
     ),
     calc: DayCalc {
-        parse: parse,
+        parse,
         part1,
         part2,
     },

@@ -26,7 +26,7 @@ pub fn get_const_fuel(positions: &CrabPositions) -> usize {
 
 fn get_fuel(positions: &[usize], target: usize) -> usize {
     positions.iter().fold(0, |acc, val| {
-        acc + (1..=val.abs_diff(target)).fold(0, |tot, off| tot + off)
+        acc + (1..=val.abs_diff(target)).sum::<usize>()
     })
 }
 
@@ -43,7 +43,7 @@ pub fn get_linear_fuel(positions: &CrabPositions) -> usize {
             break;
         }
         best_fuel = next_fuel;
-        best_pos = best_pos + 1;
+        best_pos += 1;
     }
     //search down
     loop {
@@ -52,7 +52,7 @@ pub fn get_linear_fuel(positions: &CrabPositions) -> usize {
             break;
         }
         best_fuel = next_fuel;
-        best_pos = best_pos + 1;
+        best_pos += 1;
     }
     best_fuel
 }
@@ -74,7 +74,7 @@ pub const DAY: Day<CrabPositions, usize> = Day {
         "The crabs used {answer} fuel to align",
     ),
     calc: DayCalc {
-        parse: parse,
+        parse,
         part1,
         part2,
     },

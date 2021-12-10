@@ -290,7 +290,7 @@ pub const DAY: Day<DisplayObservations, usize> = Day {
     title: "Seven Segment Search",
     display: (
         "Digits 1, 4, 7, or 8 appear {answer} times",
-        "Foobar foobar foobar {answer}",
+        "The sum of the decoded outputs is {answer}",
     ),
     calc: DayCalc {
         parse,

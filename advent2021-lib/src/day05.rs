@@ -137,8 +137,8 @@ mod tests {
 
     #[test]
     fn test_main() {
-        let something = parse(&get_input(5)).unwrap();
-        assert_eq!(part1(&something).answer.to_string(), "4873");
-        assert_eq!(part2(&something).answer.to_string(), "19472");
+        let vents = parse(&get_input(5)).unwrap();
+        assert_eq!(part1(&vents).answer.to_string(), "4873");
+        assert_eq!(part2(&vents).answer.to_string(), "19472");
     }
 }

@@ -135,7 +135,7 @@ pub fn part2(routes: &Routes) -> PartOutput<usize> {
 }
 
 pub const DAY: Day<Routes, usize> = Day {
-    title: "TITLE",
+    title: "Passage Pathing",
     display: ("There are {answer} paths", "There are {answer} paths"),
     calc: DayCalc {
         parse,

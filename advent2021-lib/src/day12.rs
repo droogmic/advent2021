@@ -34,14 +34,8 @@ impl<'a> Path<'a> {
             small_caves,
             small_cave_twice,
         } = self;
-        log::trace!(
-            "> add_next {:?} onto {:?}, {:?}, {:?}",
-            next,
-            self,
-            small_caves.contains(next),
-            *small_cave_twice
-        );
-        assert_eq!(*end, false);
+        log::trace!("> add_next {:?} onto {:?}", next, self,);
+        assert!(!end);
         let another_small_cave = small_caves.contains(next);
         if another_small_cave && (!allow_small_cave_twice || *small_cave_twice) {
             log::trace!("< add_next discarding");
@@ -49,7 +43,7 @@ impl<'a> Path<'a> {
         }
         let small_caves = {
             let mut small_caves = small_caves.clone();
-            let is_small_cave = next == &next.to_lowercase() && next != "end";
+            let is_small_cave = next == next.to_lowercase() && next != "end";
             if is_small_cave {
                 let dup = !small_caves.insert(next);
                 assert_eq!(dup, another_small_cave)
@@ -70,20 +64,20 @@ impl<'a> Path<'a> {
         Some(Self {
             caves: extended_caves,
             end: next == "end",
-            small_caves: small_caves,
-            small_cave_twice: another_small_cave,
+            small_caves,
+            small_cave_twice: *small_cave_twice || another_small_cave,
         })
     }
 }
 
 impl Routes {
-    fn path_step<'a>(&'a self, path: Path<'a>, allow_small_cave_twice: bool) -> Vec<Path<'a>> {
+    fn path_steps<'a>(&'a self, path: Path<'a>, allow_small_cave_twice: bool) -> Vec<Path<'a>> {
         if path.end {
             log::trace!("path {:?} is at end", path.caves);
             return vec![path];
         }
         let last = path.caves.last().unwrap();
-        log::trace!("path {:?} has {:?} at end", path.caves, last);
+        log::trace!("path {:?}", path);
         match self.0.get(last.to_owned()) {
             None => {
                 if last == &"end" {
@@ -95,26 +89,15 @@ impl Routes {
             Some(options) => options
                 .iter()
                 .filter_map(|next| path.add_next(next, allow_small_cave_twice))
+                .map(|path| self.path_steps(path, allow_small_cave_twice))
+                .flatten()
                 .collect(),
         }
     }
 
     fn count_paths(&self, allow_small_cave_twice: bool) -> usize {
-        let mut paths = vec![Path::new(vec!["start"])];
-        for _ in 0..100 {
-            log::debug!("paths: {:?}", paths);
-            paths = paths
-                .into_iter()
-                .map(|path| {
-                    log::trace!("looking at path: {:?}", path);
-                    self.path_step(path, allow_small_cave_twice)
-                })
-                .flatten()
-                .collect();
-            if paths.iter().all(|path| path.end) {
-                break;
-            }
-        }
+        let path = Path::new(vec!["start"]);
+        let paths = self.path_steps(path, allow_small_cave_twice);
         log::debug!("paths: {:?}", paths);
         paths.len()
     }
@@ -123,15 +106,15 @@ impl Routes {
 pub fn parse(input: &str) -> ParseResult<Routes> {
     let mut map: HashMap<String, Vec<String>> = HashMap::new();
     for line in input.lines() {
-        let mut parts = line.split("-");
+        let mut parts = line.split('-');
         let left = parts.next().ok_or(ParseError::Empty)?;
         let right = parts.next().ok_or(ParseError::Empty)?;
         if right != "start" && left != "end" {
-            let dest = map.entry(left.to_owned()).or_insert(vec![]);
+            let dest = map.entry(left.to_owned()).or_insert_with(Vec::new);
             dest.push(right.to_owned());
         }
         if left != "start" && right != "end" {
-            let dest = map.entry(right.to_owned()).or_insert(vec![]);
+            let dest = map.entry(right.to_owned()).or_insert_with(Vec::new);
             dest.push(left.to_owned());
         }
     }
@@ -153,12 +136,9 @@ pub fn part2(routes: &Routes) -> PartOutput<usize> {
 
 pub const DAY: Day<Routes, usize> = Day {
     title: "TITLE",
-    display: (
-        "Foobar foobar foobar {answer}",
-        "Foobar foobar foobar {answer}",
-    ),
+    display: ("There are {answer} paths", "There are {answer} paths"),
     calc: DayCalc {
-        parse: parse,
+        parse,
         part1,
         part2,
     },
@@ -198,25 +178,25 @@ mod tests {
         assert_eq!(routes.count_paths(true), 36);
     }
 
-    // #[test]
-    // fn test_example2_part2() {
-    //     let routes = parse(
-    //         "dc-end\nHN-start\nstart-kj\ndc-start\ndc-HN\nLN-dc\nHN-end\nkj-sa\nkj-HN\nkj-dc",
-    //     )
-    //     .unwrap();
-    //     assert_eq!(routes.count_paths(true), 103);
-    // }
+    #[test]
+    fn test_example2_part2() {
+        let routes = parse(
+            "dc-end\nHN-start\nstart-kj\ndc-start\ndc-HN\nLN-dc\nHN-end\nkj-sa\nkj-HN\nkj-dc",
+        )
+        .unwrap();
+        assert_eq!(routes.count_paths(true), 103);
+    }
 
-    // #[test]
-    // fn test_example3_part2() {
-    //     let routes = parse(DAY.example).unwrap();
-    //     assert_eq!(routes.count_paths(true), 226);
-    // }
+    #[test]
+    fn test_example3_part2() {
+        let routes = parse(DAY.example).unwrap();
+        assert_eq!(routes.count_paths(true), 3509);
+    }
 
-    // #[test]
-    // fn test_main() {
-    //     let something = parse(&get_input(12)).unwrap();
-    //     assert_eq!(part1(&something).answer.to_string(), "-1");
-    //     assert_eq!(part2(&something).answer.to_string(), "-1");
-    // }
+    #[test]
+    fn test_main() {
+        let routes = parse(&get_input(12)).unwrap();
+        assert_eq!(part1(&routes).answer.to_string(), "5958");
+        assert_eq!(part2(&routes).answer.to_string(), "150426");
+    }
 }

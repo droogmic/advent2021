@@ -124,7 +124,7 @@ pub const DAY: Day<Map, usize> = Day {
     title: "Chiton",
     display: (
         "The lowest total risk of any path is {answer}",
-        "Foobar foobar foobar {answer}",
+        "The lowest total risk of any path is {answer}",
     ),
     calc: DayCalc {
         parse,
@@ -160,10 +160,10 @@ mod tests {
         assert_eq!(result, 315);
     }
 
-    // #[test]
-    // fn test_main() {
-    //     let something = parse(&get_input(0)).unwrap();
-    //     assert_eq!(part1(&something).answer.to_string(), "-1");
-    //     assert_eq!(part2(&something).answer.to_string(), "-1");
-    // }
+    #[test]
+    fn test_main() {
+        let map = parse(&get_input(15)).unwrap();
+        assert_eq!(part1(&map).answer.to_string(), "613");
+        assert_eq!(part2(&map).answer.to_string(), "2899");
+    }
 }

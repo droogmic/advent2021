@@ -37,7 +37,7 @@ pub struct PolymerManual {
     pair_insertion: Array2<usize>,
 }
 
-const DIM: usize = 26;
+const DIM: usize = ('Z' as usize - 'A' as usize) + 1;
 
 impl std::str::FromStr for PolymerManual {
     type Err = ParseError;
@@ -63,12 +63,6 @@ impl std::str::FromStr for PolymerManual {
             })
             .collect::<ParseResult<HashMap<(Element, Element), Element>>>()?;
         let pair_insertion = {
-            // let all_element_count: usize = pair_insertion_rules
-            //     .keys()
-            //     .map(|(l, r)| vec![l, r])
-            //     .flatten()
-            //     .collect::<HashSet<&Element>>()
-            //     .len();
             let mut pair_insertion = Array2::zeros((DIM * DIM, DIM * DIM));
             for ((from_left, from_right), insert) in pair_insertion_rules.iter() {
                 let from: usize = DIM * usize::from(from_left) + usize::from(from_right);
@@ -289,10 +283,10 @@ mod tests {
         assert_eq!(counts.get(&Element::from_char('H')).unwrap(), &3849876073);
     }
 
-    // #[test]
-    // fn test_main() {
-    //     let something = parse(&get_input(14)).unwrap();
-    //     assert_eq!(part1(&something).answer.to_string(), "-1");
-    //     assert_eq!(part2(&something).answer.to_string(), "-1");
-    // }
+    #[test]
+    fn test_main() {
+        let manual = parse(&get_input(14)).unwrap();
+        assert_eq!(part1(&manual).answer.to_string(), "3048");
+        assert_eq!(part2(&manual).answer.to_string(), "3288891573057");
+    }
 }

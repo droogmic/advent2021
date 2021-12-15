@@ -19,6 +19,7 @@ pub mod day10;
 pub mod day11;
 pub mod day12;
 pub mod day13;
+pub mod day14;
 
 #[derive(Debug, Clone)]
 pub enum ParseError {
@@ -120,6 +121,7 @@ pub fn get_days() -> BTreeMap<usize, Box<dyn DayTrait + 'static>> {
     days.insert(11, Box::new(day11::DAY));
     days.insert(12, Box::new(day12::DAY));
     days.insert(13, Box::new(day13::DAY));
+    days.insert(14, Box::new(day14::DAY));
     days
 }
 

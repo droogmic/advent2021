@@ -1,6 +1,6 @@
 use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 
-#[derive(Clone, Default, Debug)]
+#[derive(Debug)]
 pub struct Something {}
 
 pub fn parse(input: &str) -> ParseResult<Something> {
@@ -51,7 +51,7 @@ mod tests {
 
     #[test]
     fn test_main() {
-        let something = parse(&get_input(4)).unwrap();
+        let something = parse(&get_input(0)).unwrap();
         assert_eq!(part1(&something).answer.to_string(), "-1");
         assert_eq!(part2(&something).answer.to_string(), "-1");
     }

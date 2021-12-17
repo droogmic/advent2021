@@ -3,8 +3,8 @@ members = ["advent2021-lib", "advent2021-bin", "advent2021-web"]
 default-members = ["advent2021-lib", "advent2021-bin"]
 
 [patch.crates-io]
-# recap = { git = "https://github.com/droogmic/recap", branch = "clippy-fixes-0.1.2" }
-recap = { path = "../recap/recap" }
+recap = { git = "https://github.com/droogmic/recap", branch = "clippy-fixes-0.1.2" }
+# recap = { path = "../recap/recap" }
 
 [profile.release]
 # less code to include into binary

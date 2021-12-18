@@ -917,6 +917,7 @@ dependencies = [
 [[package]]
 name = "recap"
 version = "0.1.2"
+source = "git+https://github.com/droogmic/recap?branch=clippy-fixes-0.1.2#556c7669b3161bffc437a287d8ab4ba2767310b0"
 dependencies = [
  "envy",
  "lazy_static",
@@ -928,6 +929,7 @@ dependencies = [
 [[package]]
 name = "recap-derive"
 version = "0.1.2"
+source = "git+https://github.com/droogmic/recap?branch=clippy-fixes-0.1.2#556c7669b3161bffc437a287d8ab4ba2767310b0"
 dependencies = [
  "proc-macro2",
  "quote",

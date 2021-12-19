@@ -52,7 +52,6 @@ pub struct TargetArea {
 }
 
 impl TargetArea {
-
     fn closest_x(&self) -> isize {
         std::cmp::min(self.start_x, self.end_x)
     }
@@ -194,7 +193,9 @@ pub fn part1(target_area: &TargetArea) -> PartOutput<usize> {
 }
 
 pub fn part2(target_area: &TargetArea) -> PartOutput<usize> {
-    PartOutput { answer: target_area.get_velocities().len() }
+    PartOutput {
+        answer: target_area.get_velocities().len(),
+    }
 }
 
 pub const DAY: Day<TargetArea, usize> = Day {

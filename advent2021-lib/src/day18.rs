@@ -1,6 +1,6 @@
 use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum SnailfishElement {
     Value(usize),
     Pair(Box<SnailfishNumber>),
@@ -34,7 +34,7 @@ impl SnailfishElement {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct SnailfishNumber(SnailfishElement, SnailfishElement);
 
 impl std::str::FromStr for SnailfishNumber {
@@ -216,6 +216,30 @@ impl SnailfishNumber {
 #[derive(Debug)]
 pub struct Homework(Vec<SnailfishNumber>);
 
+impl Homework {
+    pub fn sum(&self) -> SnailfishNumber {
+        self.0.iter().cloned().reduce(|acc, next| {
+            acc + next
+        }).unwrap()
+    }
+
+    pub fn max_pair_magnititude(&self) -> usize {
+        let mut max = 0;
+        for (left_idx, left) in self.0.iter().enumerate() {
+            for (right_idx, right) in self.0.iter().enumerate() {
+                if left_idx == right_idx {
+                    continue;
+                }
+                let magnitude = (left.clone() + right.clone()).magnitude();
+                if magnitude > max {
+                    max = magnitude;
+                }
+            }
+        }
+        max
+    }
+}
+
 impl std::str::FromStr for Homework {
     type Err = ParseError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -231,19 +255,19 @@ pub fn parse(input: &str) -> ParseResult<Homework> {
     input.parse()
 }
 
-pub fn part1(something: &Homework) -> PartOutput<usize> {
-    PartOutput { answer: 0 }
+pub fn part1(homework: &Homework) -> PartOutput<usize> {
+    PartOutput { answer: homework.sum().magnitude() }
 }
 
-pub fn part2(something: &Homework) -> PartOutput<usize> {
-    PartOutput { answer: 0 }
+pub fn part2(homework: &Homework) -> PartOutput<usize> {
+    PartOutput { answer: homework.max_pair_magnititude() }
 }
 
 pub const DAY: Day<Homework, usize> = Day {
     title: "Snailfish",
     display: (
-        "Foobar foobar foobar {answer}",
-        "Foobar foobar foobar {answer}",
+        "The magnitude of the final sum is {answer}",
+        "The largest magnitude of any sum of two different snailfish numbers is {answer}",
     ),
     calc: DayCalc {
         parse,
@@ -363,24 +387,38 @@ mod tests {
         assert_eq!(pair, "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]".parse().unwrap());
     }
 
-    // #[test]
-    // fn test_example_part1() {
-    //     let something = parse(DAY.example).unwrap();
-    //     let result = play(&something);
-    //     assert_eq!(result, -1);
-    // }
+    #[test]
+    fn test_add() {
+        let first: SnailfishNumber = "[[[[4,3],4],4],[7,[[8,4],9]]]".parse().unwrap();
+        let second: SnailfishNumber = "[1,1]".parse().unwrap();
+        assert_eq!(first + second, "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]".parse().unwrap());
+    }
 
-    // #[test]
-    // fn test_example_part2() {
-    //     let something = parse(DAY.example).unwrap();
-    //     let result = play(&something);
-    //     assert_eq!(result, -1);
-    // }
+    #[test]
+    fn test_sum() {
+        let homework: Homework = parse("[1,1]\n[2,2]\n[3,3]\n[4,4]\n[5,5]\n[6,6]").unwrap();
+        assert_eq!(homework.sum(), "[[[[5,0],[7,4]],[5,5]],[6,6]]".parse().unwrap());
+    }
 
-    // #[test]
-    // fn test_main() {
-    //     let something = parse(&get_input(0)).unwrap();
-    //     assert_eq!(part1(&something).answer.to_string(), "-1");
-    //     assert_eq!(part2(&something).answer.to_string(), "-1");
-    // }
+    #[test]
+    fn test_example_part1() {
+        let homework: Homework = parse(DAY.example).unwrap();
+        let sum = homework.sum();
+        assert_eq!(sum, "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]".parse().unwrap());
+        assert_eq!(sum.magnitude(), 4140);
+    }
+
+    #[test]
+    fn test_example_part2() {
+        let homework: Homework = parse(DAY.example).unwrap();
+        let magnitude = homework.max_pair_magnititude();
+        assert_eq!(magnitude, 3993);
+    }
+
+    #[test]
+    fn test_main() {
+        let homework = parse(&get_input(18)).unwrap();
+        assert_eq!(part1(&homework).answer.to_string(), "3734");
+        assert_eq!(part2(&homework).answer.to_string(), "4837");
+    }
 }

@@ -1,14 +1,20 @@
-use std::collections::HashMap;
-use std::collections::HashSet;
+use std::collections::BTreeMap;
+use std::collections::BTreeSet;
 
 use crate::{Day, DayCalc, ParseError, ParseResult, PartOutput};
 
 const DIM: usize = 3;
 
+// #[derive(Clone, Debug)]
+// pub struct Beacon([isize; DIM]);
+
+type Beacon = [isize; DIM];
+type BeaconSet = BTreeSet<Beacon>;
+
 #[derive(Clone, Debug)]
 pub struct Scan {
     idx: usize,
-    beacons: HashSet<[isize; DIM]>,
+    beacons: BeaconSet,
 }
 
 impl std::str::FromStr for Scan {
@@ -97,57 +103,17 @@ impl Scan {
         orientations
     }
 
-    /// Some sample of the beacons to check
-    fn sample(&self) -> Vec<[isize; DIM]> {
-        let mut corners = Vec::new();
-        for dim in 0..DIM {
-            corners.push(
-                *self
-                    .beacons
-                    .iter()
-                    .max_by_key(|beacon| beacon[dim])
-                    .unwrap(),
-            );
-            corners.push(
-                *self
-                    .beacons
-                    .iter()
-                    .min_by_key(|beacon| beacon[dim])
-                    .unwrap(),
-            );
-        }
-        corners
-    }
-
     /// Get beasons relative to some reference
-    fn beacons_relative_to(&self, reference: &[isize; DIM]) -> HashSet<[isize; DIM]> {
-        self.beacons
-            .iter()
-            .filter(|b| *b != reference)
-            .map(|b| {
-                [
-                    b[0] - reference[0],
-                    b[1] - reference[1],
-                    b[2] - reference[2],
-                ]
-            })
-            .collect()
-    }
-
-    /// Some sample of the beacons to check
-    fn nearest(&self, reference: &[isize; DIM]) -> Vec<[isize; DIM]> {
-        let mut nearest: Vec<[isize; DIM]> =
-            self.beacons_relative_to(reference).into_iter().collect();
-        nearest.sort_unstable_by_key(|k| k[0] + k[1] + k[2]);
-        nearest
+    fn beacons_relative_to(&self, reference: &Beacon) -> BeaconSet {
+        beacons_relative_to(&self.beacons, reference)
     }
 }
 
 /// Get beasons relative to some reference
 fn beacons_relative_to(
-    beacons: &HashSet<[isize; DIM]>,
+    beacons: &BeaconSet,
     reference: &[isize; DIM],
-) -> HashSet<[isize; DIM]> {
+) -> BeaconSet {
     beacons
         .iter()
         .filter(|b| *b != reference)
@@ -161,7 +127,34 @@ fn beacons_relative_to(
         .collect()
 }
 
-#[derive(Debug)]
+/// Some sample of the beacons to check
+fn beacons_sample(beacons: &BeaconSet) -> BeaconSet {
+    let mut edges = BeaconSet::new();
+    // central
+    // edges.insert(
+    //     *beacons
+    //         .iter()
+    //         .min_by_key(|beacon| beacon[0].abs() + beacon[1].abs() + beacon[2].abs())
+    //         .unwrap(),
+    // );
+    for dim in 0..DIM {
+        edges.insert(
+            *beacons
+                .iter()
+                .max_by_key(|beacon| beacon[dim])
+                .unwrap(),
+        );
+        edges.insert(
+            *beacons
+                .iter()
+                .min_by_key(|beacon| beacon[dim])
+                .unwrap(),
+        );
+    }
+    edges
+}
+
+#[derive(Clone, Debug)]
 pub struct Report {
     scans: Vec<Scan>,
 }
@@ -178,84 +171,86 @@ impl std::str::FromStr for Report {
 }
 
 impl Report {
-    fn map(&self) -> HashSet<[isize; DIM]> {
+    pub fn map(&self) -> BeaconSet {
         let first_scan = self.scans.first().unwrap();
-        let mut beacons: HashSet<[isize; DIM]> = first_scan.beacons.clone();
-        let mut reference_beacons: HashMap<[isize; DIM], HashSet<[isize; DIM]>> = beacons
+        let mut beacons: BeaconSet = first_scan.beacons.clone();
+        log::trace!("beacons: {:?}", beacons);
+        let mut reference_beacons: BTreeMap<Beacon, BeaconSet> = beacons
             .iter()
             .cloned()
             .map(|beacon| (beacon, first_scan.beacons_relative_to(&beacon)))
             .collect();
-        'scan: for scan in self.scans.iter().skip(1) {
-            log::trace!("beacons: {:?}", beacons);
-            let orientations = scan.orientations();
-            log::debug!(
-                "scan: {} - orientations: {} - reference_beacons: {}",
-                scan.idx,
-                orientations.len(),
-                reference_beacons.len()
-            );
-            log::trace!("scan: {:?}", scan);
-            for orientation in orientations {
-                log::trace!("orientation: {:?}", orientation);
-                for (reference_beacon, reference_relatives) in &reference_beacons {
-                    log::trace!("reference_relatives: {:?}", reference_relatives);
-                    for beacon in &orientation.beacons {
-                        let relatives = orientation.beacons_relative_to(beacon);
-                        log::trace!("relatives: {:?}", relatives);
-                        let intersection: HashSet<[isize; DIM]> = relatives
-                            .intersection(&reference_relatives)
-                            .cloned()
-                            .collect();
-                        log::trace!("intersection: {:?}", intersection);
-                        if intersection.len() >= 1 {
-                            log::debug!("intersection: {}", intersection.len());
-                        }
-                        if intersection.len() >= 11 {
-                            // We count the centre beacon
-                            log::debug!("match! scan {}", scan.idx);
-                            let reference_intersection: HashSet<[isize; DIM]> = intersection
-                                .into_iter()
-                                .map(|b| {
-                                    [
-                                        reference_beacon[0] + b[0],
-                                        reference_beacon[1] + b[1],
-                                        reference_beacon[2] + b[2],
-                                    ]
-                                })
-                                .collect();
-                            log::debug!("reference_intersection: {:?}", reference_intersection);
-                            let scanner = [
-                                reference_beacon[0] - beacon[0],
-                                reference_beacon[1] - beacon[1],
-                                reference_beacon[2] - beacon[2],
-                            ];
-                            log::debug!("scanner: {:?}", scanner);
-                            let remapped_beacons: HashSet<[isize; DIM]> = relatives
-                                .into_iter()
-                                .map(|b| {
-                                    [
-                                        reference_beacon[0] + b[0],
-                                        reference_beacon[1] + b[1],
-                                        reference_beacon[2] + b[2],
-                                    ]
-                                })
-                                .collect();
-                            let extra_beacons: Vec<[isize; DIM]> =
-                                remapped_beacons.difference(&beacons).cloned().collect();
-                            log::debug!("extra_beacons: {:?}", extra_beacons);
-                            beacons.extend(remapped_beacons);
-                            reference_beacons = beacons
-                                .iter()
+        let mut edge_beacons = beacons_sample(&beacons);
+        let mut prev_scans_seen = Vec::new();
+        let mut scans_seen = Vec::new();
+        scans_seen.push(first_scan.idx);
+        while scans_seen.len() < self.scans.len() {
+            if prev_scans_seen == scans_seen {
+                log::warn!("dead end!");
+            }
+            prev_scans_seen = scans_seen.clone();
+            'scan: for scan in self.scans.iter().filter(|s| !prev_scans_seen.contains(&s.idx)) {
+                let orientations = scan.orientations();
+                log::debug!(
+                    "scan: {} - orientations: {} - reference_beacons: {}",
+                    scan.idx,
+                    orientations.len(),
+                    reference_beacons.len()
+                );
+                log::trace!("scan: {:?}", scan);
+                for orientation in orientations {
+                    log::trace!("orientation: {:?}", orientation);
+                    let heuristic_beacons = if prev_scans_seen == scans_seen {
+                        &beacons
+                    } else {
+                        &edge_beacons
+                    };
+                    for reference_beacon in heuristic_beacons {
+                        let reference_relatives = reference_beacons.get(reference_beacon).unwrap();
+                        log::trace!("reference_relatives: {:?}", reference_relatives);
+                        for beacon in &orientation.beacons {
+                            let relatives = orientation.beacons_relative_to(beacon);
+                            log::trace!("relatives: {:?}", relatives);
+                            let intersection: BeaconSet = relatives
+                                .intersection(reference_relatives)
                                 .cloned()
-                                .map(|beacon| (beacon, beacons_relative_to(&beacons, &beacon)))
                                 .collect();
-                            continue 'scan;
+                            log::trace!("intersection: {:?}", intersection);
+                            if intersection.len() >= 11 {
+                                // We count the centre beacon
+                                log::debug!("match! scan {}", scan.idx);
+                                let scanner = [
+                                    reference_beacon[0] - beacon[0],
+                                    reference_beacon[1] - beacon[1],
+                                    reference_beacon[2] - beacon[2],
+                                ];
+                                log::debug!("scanner: {:?}", scanner);
+                                let remapped_beacons: BeaconSet = relatives
+                                    .into_iter()
+                                    .map(|b| {
+                                        [
+                                            reference_beacon[0] + b[0],
+                                            reference_beacon[1] + b[1],
+                                            reference_beacon[2] + b[2],
+                                        ]
+                                    })
+                                    .collect();
+                                beacons.extend(remapped_beacons);
+                                log::trace!("beacons: {:?}", beacons);
+                                reference_beacons = beacons
+                                    .iter()
+                                    .cloned()
+                                    .map(|beacon| (beacon, beacons_relative_to(&beacons, &beacon)))
+                                    .collect();
+                                edge_beacons = beacons_sample(&beacons);
+                                scans_seen.push(scan.idx);
+                                continue 'scan;
+                            }
                         }
                     }
                 }
+                log::info!("no match! scan {}", scan.idx);
             }
-            log::error!("no match! scan {}", scan.idx);
         }
         beacons
     }
@@ -265,8 +260,8 @@ pub fn parse(input: &str) -> ParseResult<Report> {
     input.parse()
 }
 
-pub fn part1(something: &Report) -> PartOutput<usize> {
-    PartOutput { answer: 0 }
+pub fn part1(report: &Report) -> PartOutput<usize> {
+    PartOutput { answer: report.map().len() }
 }
 
 pub fn part2(something: &Report) -> PartOutput<usize> {
@@ -306,6 +301,8 @@ mod tests {
         log::debug!("report: {:?}", report);
         let beacons = report.map();
         log::debug!("beacons: {:?}", beacons);
+        log::debug!("beacons.len(): {}", beacons.len());
+        assert_eq!(beacons.len(), 79)
     }
 
     // #[test]

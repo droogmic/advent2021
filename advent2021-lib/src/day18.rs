@@ -20,7 +20,7 @@ impl std::str::FromStr for SnailfishElement {
 impl SnailfishElement {
     pub fn explode(&mut self, nesting: usize) -> Option<(Option<usize>, Option<usize>)> {
         match self {
-            Self::Value(val) => None,
+            Self::Value(_val) => None,
             Self::Pair(number) => number.explode(nesting + 1),
         }
     }

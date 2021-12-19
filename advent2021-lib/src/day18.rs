@@ -218,9 +218,11 @@ pub struct Homework(Vec<SnailfishNumber>);
 
 impl Homework {
     pub fn sum(&self) -> SnailfishNumber {
-        self.0.iter().cloned().reduce(|acc, next| {
-            acc + next
-        }).unwrap()
+        self.0
+            .iter()
+            .cloned()
+            .reduce(|acc, next| acc + next)
+            .unwrap()
     }
 
     pub fn max_pair_magnititude(&self) -> usize {
@@ -256,11 +258,15 @@ pub fn parse(input: &str) -> ParseResult<Homework> {
 }
 
 pub fn part1(homework: &Homework) -> PartOutput<usize> {
-    PartOutput { answer: homework.sum().magnitude() }
+    PartOutput {
+        answer: homework.sum().magnitude(),
+    }
 }
 
 pub fn part2(homework: &Homework) -> PartOutput<usize> {
-    PartOutput { answer: homework.max_pair_magnititude() }
+    PartOutput {
+        answer: homework.max_pair_magnititude(),
+    }
 }
 
 pub const DAY: Day<Homework, usize> = Day {
@@ -335,11 +341,9 @@ mod tests {
 
     #[test]
     fn test_parse_bad() {
-        let pair: ParseResult<SnailfishNumber> = "[[1,2],[[3,4],5]"
-            .parse();
+        let pair: ParseResult<SnailfishNumber> = "[[1,2],[[3,4],5]".parse();
         assert!(pair.is_err());
-        let pair: ParseResult<SnailfishNumber> = "[[1,2],[[3,4],5]]]"
-            .parse();
+        let pair: ParseResult<SnailfishNumber> = "[[1,2],[[3,4],5]]]".parse();
         assert!(pair.is_err());
     }
 
@@ -384,27 +388,41 @@ mod tests {
         pair.split();
         assert_eq!(pair, "[[[[0,7],4],[[7,8],[0,13]]],[1,1]]".parse().unwrap());
         pair.split();
-        assert_eq!(pair, "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]".parse().unwrap());
+        assert_eq!(
+            pair,
+            "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]".parse().unwrap()
+        );
     }
 
     #[test]
     fn test_add() {
         let first: SnailfishNumber = "[[[[4,3],4],4],[7,[[8,4],9]]]".parse().unwrap();
         let second: SnailfishNumber = "[1,1]".parse().unwrap();
-        assert_eq!(first + second, "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]".parse().unwrap());
+        assert_eq!(
+            first + second,
+            "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]".parse().unwrap()
+        );
     }
 
     #[test]
     fn test_sum() {
         let homework: Homework = parse("[1,1]\n[2,2]\n[3,3]\n[4,4]\n[5,5]\n[6,6]").unwrap();
-        assert_eq!(homework.sum(), "[[[[5,0],[7,4]],[5,5]],[6,6]]".parse().unwrap());
+        assert_eq!(
+            homework.sum(),
+            "[[[[5,0],[7,4]],[5,5]],[6,6]]".parse().unwrap()
+        );
     }
 
     #[test]
     fn test_example_part1() {
         let homework: Homework = parse(DAY.example).unwrap();
         let sum = homework.sum();
-        assert_eq!(sum, "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]".parse().unwrap());
+        assert_eq!(
+            sum,
+            "[[[[6,6],[7,6]],[[7,7],[7,0]]],[[[7,7],[7,7]],[[7,8],[9,9]]]]"
+                .parse()
+                .unwrap()
+        );
         assert_eq!(sum.magnitude(), 4140);
     }
 

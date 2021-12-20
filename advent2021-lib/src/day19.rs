@@ -8,13 +8,16 @@ const DIM: usize = 3;
 // #[derive(Clone, Debug)]
 // pub struct Beacon([isize; DIM]);
 
-type Beacon = [isize; DIM];
+type Position = [isize; DIM];
+type Scanner = Position;
+type Beacon = Position;
 type BeaconSet = BTreeSet<Beacon>;
 
 #[derive(Clone, Debug)]
 pub struct Scan {
     idx: usize,
     beacons: BeaconSet,
+    orientations: Vec<BeaconSet>,
 }
 
 impl std::str::FromStr for Scan {
@@ -56,13 +59,14 @@ impl std::str::FromStr for Scan {
                 Ok(point)
             })
             .collect::<ParseResult<_>>()?;
-        Ok(Self { idx, beacons })
+        Ok(Self::new(idx, beacons))
     }
 }
 
 impl Scan {
-    fn orientations(&self) -> Vec<Scan> {
+    fn new(idx: usize, beacons: BeaconSet) -> Self {
         let mut orientations = Vec::new();
+        // I can throw half of these away, but I don't know which ones...
         for x in 0..DIM {
             for y in 0..DIM {
                 for z in 0..DIM {
@@ -72,10 +76,8 @@ impl Scan {
                     for x_sig in [false, true] {
                         for y_sig in [false, true] {
                             for z_sig in [false, true] {
-                                orientations.push(Scan {
-                                    idx: self.idx,
-                                    beacons: self
-                                        .beacons
+                                orientations.push(
+                                    beacons
                                         .iter()
                                         .map(|p| {
                                             let mut x = p[x];
@@ -93,14 +95,18 @@ impl Scan {
                                             [x, y, z]
                                         })
                                         .collect(),
-                                });
+                                );
                             }
                         }
                     }
                 }
             }
         }
-        orientations
+        Scan {
+            idx,
+            beacons,
+            orientations,
+        }
     }
 
     /// Get beasons relative to some reference
@@ -110,10 +116,7 @@ impl Scan {
 }
 
 /// Get beasons relative to some reference
-fn beacons_relative_to(
-    beacons: &BeaconSet,
-    reference: &[isize; DIM],
-) -> BeaconSet {
+fn beacons_relative_to(beacons: &BeaconSet, reference: &[isize; DIM]) -> BeaconSet {
     beacons
         .iter()
         .filter(|b| *b != reference)
@@ -130,26 +133,9 @@ fn beacons_relative_to(
 /// Some sample of the beacons to check
 fn beacons_sample(beacons: &BeaconSet) -> BeaconSet {
     let mut edges = BeaconSet::new();
-    // central
-    // edges.insert(
-    //     *beacons
-    //         .iter()
-    //         .min_by_key(|beacon| beacon[0].abs() + beacon[1].abs() + beacon[2].abs())
-    //         .unwrap(),
-    // );
     for dim in 0..DIM {
-        edges.insert(
-            *beacons
-                .iter()
-                .max_by_key(|beacon| beacon[dim])
-                .unwrap(),
-        );
-        edges.insert(
-            *beacons
-                .iter()
-                .min_by_key(|beacon| beacon[dim])
-                .unwrap(),
-        );
+        edges.insert(*beacons.iter().max_by_key(|beacon| beacon[dim]).unwrap());
+        edges.insert(*beacons.iter().min_by_key(|beacon| beacon[dim]).unwrap());
     }
     edges
 }
@@ -171,7 +157,7 @@ impl std::str::FromStr for Report {
 }
 
 impl Report {
-    pub fn map(&self) -> BeaconSet {
+    pub fn map(&self) -> (Vec<Scanner>, BeaconSet) {
         let first_scan = self.scans.first().unwrap();
         let mut beacons: BeaconSet = first_scan.beacons.clone();
         log::trace!("beacons: {:?}", beacons);
@@ -182,15 +168,19 @@ impl Report {
             .collect();
         let mut edge_beacons = beacons_sample(&beacons);
         let mut prev_scans_seen = Vec::new();
-        let mut scans_seen = Vec::new();
-        scans_seen.push(first_scan.idx);
+        let mut scans_seen = vec![first_scan.idx];
+        let mut scanners = vec![[0, 0, 0]];
         while scans_seen.len() < self.scans.len() {
             if prev_scans_seen == scans_seen {
                 log::warn!("dead end!");
             }
             prev_scans_seen = scans_seen.clone();
-            'scan: for scan in self.scans.iter().filter(|s| !prev_scans_seen.contains(&s.idx)) {
-                let orientations = scan.orientations();
+            'scan: for scan in self
+                .scans
+                .iter()
+                .filter(|s| !prev_scans_seen.contains(&s.idx))
+            {
+                let orientations = &scan.orientations;
                 log::debug!(
                     "scan: {} - orientations: {} - reference_beacons: {}",
                     scan.idx,
@@ -198,8 +188,8 @@ impl Report {
                     reference_beacons.len()
                 );
                 log::trace!("scan: {:?}", scan);
-                for orientation in orientations {
-                    log::trace!("orientation: {:?}", orientation);
+                for orientation_beacons in orientations {
+                    log::trace!("orientation_beacons: {:?}", orientation_beacons);
                     let heuristic_beacons = if prev_scans_seen == scans_seen {
                         &beacons
                     } else {
@@ -208,8 +198,8 @@ impl Report {
                     for reference_beacon in heuristic_beacons {
                         let reference_relatives = reference_beacons.get(reference_beacon).unwrap();
                         log::trace!("reference_relatives: {:?}", reference_relatives);
-                        for beacon in &orientation.beacons {
-                            let relatives = orientation.beacons_relative_to(beacon);
+                        for beacon in orientation_beacons {
+                            let relatives = beacons_relative_to(orientation_beacons, beacon);
                             log::trace!("relatives: {:?}", relatives);
                             let intersection: BeaconSet = relatives
                                 .intersection(reference_relatives)
@@ -225,6 +215,7 @@ impl Report {
                                     reference_beacon[2] - beacon[2],
                                 ];
                                 log::debug!("scanner: {:?}", scanner);
+                                scanners.push(scanner);
                                 let remapped_beacons: BeaconSet = relatives
                                     .into_iter()
                                     .map(|b| {
@@ -252,7 +243,7 @@ impl Report {
                 log::info!("no match! scan {}", scan.idx);
             }
         }
-        beacons
+        (scanners, beacons)
     }
 }
 
@@ -261,18 +252,35 @@ pub fn parse(input: &str) -> ParseResult<Report> {
 }
 
 pub fn part1(report: &Report) -> PartOutput<usize> {
-    PartOutput { answer: report.map().len() }
+    let (_scanners, beacons) = report.map();
+    PartOutput {
+        answer: beacons.len(),
+    }
 }
 
-pub fn part2(something: &Report) -> PartOutput<usize> {
-    PartOutput { answer: 0 }
+pub fn part2(report: &Report) -> PartOutput<usize> {
+    let (scanners, _beacons) = report.map();
+    let mut max = 0;
+    for a_scanner in &scanners {
+        for b_scanner in &scanners {
+            let manhattan: usize = (0..DIM)
+                .map(|dim| (b_scanner[dim] - a_scanner[dim]).abs())
+                .sum::<isize>()
+                .try_into()
+                .unwrap();
+            if manhattan > max {
+                max = manhattan
+            }
+        }
+    }
+    PartOutput { answer: max }
 }
 
 pub const DAY: Day<Report, usize> = Day {
     title: "Beacon Scanner",
     display: (
-        "Foobar foobar foobar {answer}",
-        "Foobar foobar foobar {answer}",
+        "There are {answer} beacons",
+        "The largest Manhattan distance is {answer}",
     ),
     calc: DayCalc {
         parse,
@@ -285,21 +293,21 @@ pub const DAY: Day<Report, usize> = Day {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::get_input;
+    // use crate::get_input;
     use test_log::test;
 
     #[test]
     fn test_scan() {
         let scan: Scan = "--- scanner 0 ---\n-1,-1,1\n8,0,7".parse().unwrap();
         log::debug!("scan: {:?}", scan);
-        log::debug!("orientations: {:#?}", scan.orientations(),)
+        log::debug!("scan.orientations: {:#?}", scan.orientations)
     }
 
     #[test]
     fn test_example_report() {
         let report = parse(DAY.example).unwrap();
         log::debug!("report: {:?}", report);
-        let beacons = report.map();
+        let (_scanners, beacons) = report.map();
         log::debug!("beacons: {:?}", beacons);
         log::debug!("beacons.len(): {}", beacons.len());
         assert_eq!(beacons.len(), 79)

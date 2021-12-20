@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cached = "0.26"
 log = "0.4"
 ndarray = "0.15"
 pathfinding = "3.0"
